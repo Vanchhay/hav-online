@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="760" viewBox="0 0 600 760">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#f6e7d8"/><stop offset="1" stop-color="#d3a985"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="760" fill="url(#hg)"/>
+  <g fill="#a66b44" opacity="0.35">
+    <path d="M300 210 C300 190 278 176 256 176 C226 176 208 200 208 226 C208 268 258 300 300 336
+             C342 300 392 268 392 226 C392 200 374 176 344 176 C322 176 300 190 300 210 Z"/>
+  </g>
+  <text x="300" y="470" font-family="Parisienne, cursive, Georgia" font-size="68" fill="#8a4f34"
+        text-anchor="middle">Khemra &amp; Neath</text>
+  <text x="300" y="530" font-family="Georgia, serif" font-size="24" fill="#8a4f34"
+        text-anchor="middle" letter-spacing="4" opacity="0.75">01 · FEBRUARY · 2027</text>
+</svg>

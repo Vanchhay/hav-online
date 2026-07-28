@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="460" viewBox="0 0 600 460">
+  <rect width="600" height="460" fill="#f7efe3"/>
+  <g stroke="#d9c3ab" stroke-width="10" fill="none" opacity="0.9">
+    <path d="M60 120 H540"/><path d="M60 260 H540"/><path d="M220 40 V420"/><path d="M400 40 V420"/>
+    <path d="M60 120 L220 260"/>
+  </g>
+  <g font-family="Georgia, serif" font-size="15" fill="#8a5a3a">
+    <g transform="translate(300,120)"><circle r="14" fill="#a66b44"/><text x="0" y="-22" text-anchor="middle" font-weight="bold" fill="#7a4a2c">VENUE</text></g>
+    <g transform="translate(430,90)"><circle r="9" fill="#c99a72"/><text x="16" y="4">AEON Mall</text></g>
+    <g transform="translate(150,200)"><circle r="9" fill="#c99a72"/><text x="16" y="4">Lucky Express</text></g>
+    <g transform="translate(120,300)"><circle r="9" fill="#c99a72"/><text x="16" y="4">Global House</text></g>
+    <g transform="translate(400,300)"><circle r="9" fill="#c99a72"/><text x="16" y="4">Makro</text></g>
+  </g>
+</svg>
