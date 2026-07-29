@@ -77,9 +77,34 @@ const SOCIAL_ICONS = {
 };
 
 /* =================================================================
+   Resolve invitee name from ?v=<id> → data/invitees.csv
+   ================================================================= */
+async function resolveInviteeName() {
+  const id = new URLSearchParams(window.location.search).get("v");
+  if (!id) return;
+  try {
+    const text = await fetch("data/invitees.csv").then((r) => r.text());
+    const lines = text.trim().split("\n").slice(1); // skip header
+    for (const line of lines) {
+      const comma = line.indexOf(",");
+      if (comma === -1) continue;
+      const rowId = line.slice(0, comma).trim();
+      const rowName = line.slice(comma + 1).trim();
+      if (rowId === id) {
+        CONFIG.album_display_name = rowName;
+        return;
+      }
+    }
+  } catch (_) {
+    // fetch failed — keep default
+  }
+}
+
+/* =================================================================
    Boot
    ================================================================= */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await resolveInviteeName();
   populateText();
   buildAgenda();
   buildGallery();
