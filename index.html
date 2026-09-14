@@ -1,267 +1,142 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title id="page-title">សិរីមង្គលអាពាហ៍ពិពាហ៍ — សូមគោរពអញ្ជើញ</title>
-  <meta name="description" content="Khmer digital wedding invitation" />
-
-  <!-- Open Graph (nice link previews on Messenger / Telegram) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" id="og-title" content="Khemra & Neath — Wedding Invitation" />
-  <meta property="og:description" content="We respectfully invite you to our wedding." />
-  <meta property="og:image" content="assets/img/hero.svg" />
-
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
-
-  <!-- Khmer + Latin fonts. Swap for local @font-face files to run fully offline. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Moul&family=Battambang:wght@400;700&family=Noto+Serif+Khmer:wght@400;600&family=Parisienne&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wedding Invitation</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- ============ Card frame: the whole invitation lives in a centered 600px column ============ -->
-<div class="card">
+<main class="deck">
 
-  <!-- Ambient background (looping video optional; animated gradient + petals as fallback) -->
-  <div class="ambient" id="ambient">
-    <video class="ambient-video" id="ambient-video" muted loop playsinline preload="none"></video>
-    <div class="petals" id="petals" aria-hidden="true"></div>
-  </div>
-
-  <!-- ============================= COVER / ENVELOPE ============================= -->
-  <section class="cover" id="cover">
-    <div class="cover-frame">
-      <!-- Ornate Khmer pointed-arch frame (inline SVG so it scales crisply) -->
-      <svg class="frame-svg" viewBox="0 0 400 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#caa07d"/><stop offset="0.5" stop-color="#a66b44"/><stop offset="1" stop-color="#caa07d"/>
-          </linearGradient>
-        </defs>
-        <path d="M200 18 C120 40 60 70 60 150 L60 560 C60 600 90 622 130 622
-                 L270 622 C310 622 340 600 340 560 L340 150 C340 70 280 40 200 18 Z"
-              fill="none" stroke="url(#gold)" stroke-width="3"/>
-        <path d="M200 34 C128 54 74 82 74 154 L74 556 C74 592 100 610 134 610
-                 L266 610 C300 610 326 592 326 556 L326 154 C326 82 272 54 200 34 Z"
-              fill="none" stroke="url(#gold)" stroke-width="1.4" opacity="0.8"/>
-        <!-- top pinnacle ornament -->
-        <path d="M200 26 L214 60 L200 78 L186 60 Z" fill="url(#gold)"/>
-        <circle cx="200" cy="98" r="6" fill="url(#gold)"/>
-        <!-- corner flourishes -->
-        <path d="M74 150 q40 -40 80 -6 q-42 -6 -80 30 Z" fill="url(#gold)" opacity="0.85"/>
-        <path d="M326 150 q-40 -40 -80 -6 q42 -6 80 30 Z" fill="url(#gold)" opacity="0.85"/>
-        <path d="M74 560 q40 40 80 6 q-42 6 -80 -30 Z" fill="url(#gold)" opacity="0.85"/>
-        <path d="M326 560 q-40 40 -80 6 q42 6 80 -30 Z" fill="url(#gold)" opacity="0.85"/>
-      </svg>
-
-      <div class="cover-inner">
-        <div class="cover-monogram">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <path d="M60 40 C60 32 52 26 44 26 C32 26 26 36 26 46 C26 62 44 74 60 88
-                     C76 74 94 62 94 46 C94 36 88 26 76 26 C68 26 60 32 60 40 Z"
-                  fill="none" stroke="#a66b44" stroke-width="2.4"/>
-            <text x="60" y="60" text-anchor="middle" font-family="Parisienne, cursive" font-size="34" fill="#a66b44">K&amp;N</text>
-          </svg>
-        </div>
-        <h2 class="cover-kh-title">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
-        <p class="cover-kh-sub">សូមគោរពអញ្ជើញ</p>
-        <p class="cover-album" id="cover-album">PECH ANNIEE</p>
-
-        <button class="btn-open zoom-in-out-box" id="btn-open" type="button">
-          <span class="btn-open-kh">សូមចុចបើកសំបុត្រ</span>
-          <span class="btn-open-en">Click to Open The Invitation</span>
-        </button>
+  <!-- ============ 1 · INVITATION ============ -->
+  <section class="page" id="p1">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p1-bg.jpg"><img fetchpriority="high" decoding="async" src="assets/img/p1-bg.jpg" alt=""></div>
+      <div class="frame__body body--center">
+        <div class="slot slot--fit p1__card" data-slot="p1-content.png"><img fetchpriority="high" decoding="async" src="assets/img/p1-content.png" alt=""></div>
       </div>
     </div>
   </section>
 
-  <!-- ============================= OPEN INTRO (cinematic overlay) ============================= -->
-  <div class="intro" id="intro" aria-hidden="true">
-    <video class="intro-video" id="intro-video" muted playsinline preload="none"></video>
-    <div class="intro-fallback" id="intro-fallback">
-      <div class="intro-petals" aria-hidden="true"></div>
-      <div class="intro-names">
-        <span class="intro-amp-top" id="intro-groom">Khemra</span>
-        <span class="intro-amp">&amp;</span>
-        <span class="intro-amp-bottom" id="intro-bride">Neath</span>
+  <!-- ============ 2 · AGENDA ============ -->
+  <section class="page" id="p2">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p2-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p2-bg.jpg" alt=""></div>
+      <div class="frame__body body--center">
+        <div class="slot slot--fit p2__card" data-slot="p2-content.png"><img loading="lazy" decoding="async" src="assets/img/p2-content.png" alt=""></div>
       </div>
-      <div class="intro-date" id="intro-date">01 · FEBRUARY · 2027</div>
-      <div class="intro-skip">tap to continue</div>
     </div>
-  </div>
+  </section>
 
-  <!-- ============================= INVITATION CONTENT (hidden until opened) ============================= -->
-  <main class="content" id="content" hidden>
 
-    <!-- swipe-up hint -->
-    <div class="swipe-hint" id="swipe-hint"><span>អូសឡើងទៅលើ</span><i>⌃</i></div>
-
-    <!-- ---------- 1. Invitation detail ---------- -->
-    <section class="sec sec-event" id="event">
-      <div class="hero js-scroll fade-in">
-        <img src="assets/img/hero.svg" alt="Couple photo" />
+  <!-- ============ 3 · Location ============ -->
+  <section class="page" id="p3">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p3-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p2-bg.jpg" alt=""></div>
+      <div class="frame__body body--center">
+        <a class="p3__tap" href="#" data-map-link>
+          <div class="slot slot--fit p3__card" data-slot="p3-content.png"><img loading="lazy" decoding="async" src="assets/img/p3-content.png" alt=""></div>
+        </a>
       </div>
-      <div class="invite-card js-scroll fade-in-bottom">
-        <div class="parents">
-          <div class="parent"><span class="p-label">GROOM'S PARENTS</span><span class="p-name" id="groom-parents">Mr. … &amp; Mrs. Ros Samoun</span></div>
-          <span class="parent-amp">✦</span>
-          <div class="parent"><span class="p-label">BRIDE'S PARENTS</span><span class="p-name" id="bride-parents">Mr. … &amp; Mrs. Vong Phanny</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 3 · LOCATION ============ -->
+  <!-- <section class="page" id="p3">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p3-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p3-bg.png" alt=""></div>
+      <div class="frame__body p3__stack">
+        <div class="slot slot--fit p3__heading" data-slot="p3-heading.png"><img loading="lazy" decoding="async" src="assets/img/p3-heading.png" alt=""></div>
+        <div class="slot slot--fit p3__map" data-slot="p3-map.png"><img loading="lazy" decoding="async" src="assets/img/p3-map.png" alt=""></div>
+        <a class="p3__link" href="#" data-map-link>
+          <div class="slot slot--fit p3__cta" data-slot="p3-cta.png"><img loading="lazy" decoding="async" src="assets/img/p3-cta.png" alt=""></div>
+        </a>
+        <div class="slot slot--fit p3__qr" data-slot="p3-qr.png"><img loading="lazy" decoding="async" src="assets/img/p3-qr.png" alt=""></div>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- ============ 4 · COUNTDOWN ============ -->
+  <section class="page" id="p4">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p4-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
+      <div class="frame__body p4__stack">
+
+        <div class="p4__strip">
+          <div class="slot p4__photo" data-slot="p4-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-1.jpg" alt=""></div>
+          <div class="slot p4__photo" data-slot="p4-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-2.jpg" alt=""></div>
+          <div class="slot p4__photo" data-slot="p4-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-3.jpg" alt=""></div>
+
+          <div class="countdown" data-countdown>
+            <div class="countdown__unit"><span class="countdown__num" data-cd="days">--</span><span class="countdown__label">DAYS</span></div>
+            <span class="countdown__sep">:</span>
+            <div class="countdown__unit"><span class="countdown__num" data-cd="hours">--</span><span class="countdown__label">HOURS</span></div>
+            <span class="countdown__sep">:</span>
+            <div class="countdown__unit"><span class="countdown__num" data-cd="minutes">--</span><span class="countdown__label">MINUTES</span></div>
+            <span class="countdown__sep">:</span>
+            <div class="countdown__unit"><span class="countdown__num" data-cd="seconds">--</span><span class="countdown__label">SECONDS</span></div>
+          </div>
         </div>
 
-        <h1 class="invite-title">WEDDING INVITATION</h1>
-        <div class="ornament">❧ ⚜ ❧</div>
-        <p class="invite-request">
-          cordially request the honor of your presence on the auspicious occasion of the wedding of our children
-        </p>
-
-        <div class="couple-row">
-          <div class="couple-col">
-            <span class="c-label">GROOM</span>
-            <span class="c-name" id="groom-en">KIM KHEMRA</span>
-            <span class="c-name-kh" id="groom-kh">គីម ខេមរ៉ា</span>
-          </div>
-          <span class="couple-amp">&amp;</span>
-          <div class="couple-col">
-            <span class="c-label">BRIDE</span>
-            <span class="c-name" id="bride-en">SAY SOPHEAKNEATH</span>
-            <span class="c-name-kh" id="bride-kh">សាយ សុភ័ក្រនាថ</span>
-          </div>
-        </div>
-
-        <p class="invite-when" id="invite-when">ON 01 FEBRUARY 2027, AT 5:00 PM.</p>
-        <p class="invite-where" id="invite-where">AT THE PREMIER CENTER SEN SOK (BUILDING H), PHNOM PENH. THANK YOU.</p>
-
-        <button class="btn-pill" id="btn-save-date">
-          <span class="pill-kh">ចុចរក្សាទុកថ្ងៃកម្មវិធី</span><span class="pill-en">Save The Date</span>
-        </button>
+        <div class="slot slot--fit p4__tagline" data-slot="p4-tagline.png"><img loading="lazy" decoding="async" src="assets/img/p4-tagline.png" alt=""></div>
+        <div class="slot slot--fit p4__card" data-slot="p4-content.png"><img loading="lazy" decoding="async" src="assets/img/p4-content.png" alt=""></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ---------- 2. Countdown ---------- -->
-    <section class="sec sec-countdown" id="countdown">
-      <div class="sec-head center js-scroll fade-in-bottom">
-        <h3 class="kh">ចំនួនថ្ងៃរាប់ថយក្រោយ</h3>
-        <span class="deco-line"></span>
-        <h4 class="en">EVENT COUNTDOWN</h4>
+  <!-- ============ 5 · GALLERY A ============ -->
+  <section class="page" id="p5">
+    <div class="frame frame--plain">
+      <div class="slot slot--bg" data-slot="p5-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
+      <div class="frame__body p5__stack">
+        <div class="slot slot--fit p5__heading" data-slot="p5-heading.png"><img loading="lazy" decoding="async" src="assets/img/p5-heading.png" alt=""></div>
+        <div class="slot p5__photo" data-slot="p5-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p5-photo-1-1.jpg" alt=""></div>
+        <div class="slot p5__photo" data-slot="p5-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p5-photo-2.jpg" alt=""></div>
       </div>
-      <div class="countdown-grid js-scroll fade-in-bottom" id="countdown-grid">
-        <div class="cd-cell"><span class="cd-num" data-cd="days">--</span><span class="cd-lbl">Days</span></div>
-        <div class="cd-cell"><span class="cd-num" data-cd="hours">--</span><span class="cd-lbl">Hours</span></div>
-        <div class="cd-cell"><span class="cd-num" data-cd="minutes">--</span><span class="cd-lbl">Minutes</span></div>
-        <div class="cd-cell"><span class="cd-num" data-cd="seconds">--</span><span class="cd-lbl">Seconds</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · GALLERY B ============ -->
+  <section class="page" id="p6">
+    <div class="frame frame--plain">
+      <div class="slot slot--bg" data-slot="p6-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
+      <div class="frame__body p6__grid">
+        <div class="slot g6-a" data-slot="p6-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-1.jpg" alt=""></div>
+        <div class="slot g6-b" data-slot="p6-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-2.jpg" alt=""></div>
+        <div class="slot g6-c" data-slot="p6-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-3.jpg" alt=""></div>
+        <div class="slot g6-d" data-slot="p6-photo-4.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-4.jpg" alt=""></div>
+        <div class="slot g6-e" data-slot="p6-photo-5.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-5.jpg" alt=""></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ---------- 3. Agenda ---------- -->
-    <section class="sec sec-agenda" id="agenda">
-      <div class="sec-head js-scroll slide-right">
-        <span class="line"></span>
-        <div><h3 class="kh">របៀបវារៈកម្មវិធី</h3><h4 class="en">/ EVENT AGENDA</h4></div>
+  <!-- ============ 7 · GALLERY C ============ -->
+  <section class="page" id="p7">
+    <div class="frame frame--plain">
+      <div class="frame__body p7__grid">
+        <div class="slot g7-a" data-slot="p7-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-1.jpg" alt=""></div>
+        <div class="slot g7-b" data-slot="p7-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-2.jpg" alt=""></div>
+        <div class="slot g7-c" data-slot="p7-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-3-1.jpg" alt=""></div>
+        <div class="slot g7-d" data-slot="p7-photo-4.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-4.jpg" alt=""></div>
+        <div class="slot g7-e" data-slot="p7-photo-5.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-5.jpg" alt=""></div>
       </div>
-      <p class="agenda-date js-scroll fade-in" id="agenda-date">ថ្ងៃអាទិត្យ ត្រូវនឹងថ្ងៃទី ០១ ខែកុម្ភៈ ឆ្នាំ២០២៧</p>
-      <ul class="timeline" id="timeline"><!-- built from CONFIG.agenda --></ul>
-    </section>
+    </div>
+  </section>
 
-    <!-- ---------- 4. Location ---------- -->
-    <section class="sec sec-location" id="location">
-      <div class="sec-head js-scroll slide-left">
-        <span class="line"></span>
-        <div><h3 class="kh">ទីតាំងកម្មវិធី</h3><h4 class="en">/ LOCATION</h4></div>
+  <!-- ============ 8 · THANK YOU ============ -->
+  <section class="page" id="p8">
+    <div class="frame">
+      <div class="slot slot--bg" data-slot="p8-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
+      <div class="slot slot--fit p8__floral" data-slot="p8-floral.png"><img loading="lazy" decoding="async" src="assets/img/p8-floral.png" alt=""></div>
+      <div class="frame__body body--center">
+        <div class="slot slot--fit p8__card" data-slot="p8-content.png"><img loading="lazy" decoding="async" src="assets/img/p8-content-1.png" alt=""></div>
       </div>
-      <p class="venue-kh js-scroll fade-in" id="venue-kh">នៅ ព្រីមៀ សេនធ័រ សែនសុខ (អគារ H) ភ្នំពេញ</p>
-      <p class="venue-en js-scroll fade-in" id="venue-en">AT THE PREMIER CENTER SEN SOK (BUILDING H), PHNOM PENH</p>
-      <a class="map-illustration js-scroll fade-in-bottom lightbox-item" href="assets/img/map.svg" data-caption="Venue map">
-        <img src="assets/img/map.svg" alt="Map to the venue" />
-      </a>
-      <div class="qr-block js-scroll fade-in-bottom">
-        <img src="assets/img/map-qr.svg" alt="Scan for Google Maps" />
-        <span>ស្កេនបញ្ជាក់ទីតាំង · GOOGLE MAPS</span>
-      </div>
-      <button class="btn-pill center-pill" id="btn-location">
-        <span class="pill-kh">បើកមើលទីតាំង</span><span class="pill-en">View Location</span>
-      </button>
-    </section>
+    </div>
+  </section>
 
-    <!-- ---------- 5. Gallery ---------- -->
-    <section class="sec sec-gallery" id="gallery">
-      <div class="sec-head js-scroll slide-right">
-        <span class="line"></span>
-        <div><h3 class="kh">វិចិត្រសាល</h3><h4 class="en">/ PHOTO GALLERY</h4></div>
-      </div>
-      <div class="gallery-grid" id="gallery-grid"><!-- built from CONFIG.gallery --></div>
-    </section>
-
-    <!-- ---------- 6. Gratitude ---------- -->
-    <section class="sec sec-gratitude" id="gratitude">
-      <div class="sec-head center js-scroll fade-in-bottom">
-        <h3 class="kh">សេចក្តីថ្លែងអំណរគុណ</h3>
-        <span class="deco-line"></span>
-        <h4 class="en">OUR GRATITUDE</h4>
-      </div>
-      <p class="gratitude-kh js-scroll fade-in" id="gratitude-kh"></p>
-      <div class="ornament js-scroll fade-in">❧ ⚜ ❧</div>
-      <p class="gratitude-en js-scroll fade-in" id="gratitude-en"></p>
-    </section>
-
-    <!-- ---------- 7. Greeting / Wishes wall ---------- -->
-    <section class="sec sec-wish" id="wish">
-      <div class="sec-head js-scroll slide-left">
-        <span class="line"></span>
-        <div><h3 class="kh">សារជូនពរ</h3><h4 class="en">/ GREETING MESSAGE</h4></div>
-      </div>
-      <form class="wish-form js-scroll fade-in-bottom" id="wish-form" autocomplete="off">
-        <input type="text" id="wish-name" name="name" placeholder="ឈ្មោះ · Name" required maxlength="60" />
-        <textarea id="wish-msg" name="message" placeholder="សារជូនពរ · Comment" required maxlength="300" rows="3"></textarea>
-        <button class="btn-pill" type="submit">
-          <span class="pill-kh">ចុចផ្ញើសារជូនពរ</span><span class="pill-en">Send Greeting</span>
-        </button>
-        <div class="form-msg" id="wish-alert" role="status"></div>
-      </form>
-      <div class="wish-list" id="wish-list" aria-live="polite"></div>
-    </section>
-
-    <!-- ---------- 8. Footer ---------- -->
-    <footer class="site-footer">
-      <p class="footer-brand">E-Invitation Template</p>
-      <p class="footer-tagline">Make your invitation come alive</p>
-      <p class="footer-contact">Telegram : <span id="footer-telegram">081 711 611</span></p>
-      <div class="footer-social" id="footer-social"></div>
-    </footer>
-
-    <div class="content-bottom-space"></div>
-  </main>
-
-  <!-- ============================= FIXED BOTTOM NAV ============================= -->
-  <nav class="nav-footer" id="nav-footer" hidden>
-    <button class="audio-toggle" id="audio-toggle" title="Music on/off" aria-label="Toggle music">
-      <svg class="ic on" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z" fill="currentColor"/><path d="M16 8c1.5 1 1.5 7 0 8M18.5 6c3 2 3 10 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <svg class="ic off" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    </button>
-    <ul class="nav-links">
-      <li><button data-target="agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.7" fill="none"/></svg></button></li>
-      <li><button data-target="location" aria-label="Location"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.4 7-12a7 7 0 10-14 0c0 5.6 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg></button></li>
-      <li><button data-target="gallery" aria-label="Gallery"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="8.5" cy="10" r="1.6" fill="currentColor"/><path d="M4 18l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button></li>
-      <li><button data-target="wish" aria-label="Greeting"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-4 4V5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.6"/></svg></button></li>
-    </ul>
-  </nav>
-
-  <!-- Background music. Drop a file at assets/audio/song.mp3 (path set in CONFIG). -->
-  <audio id="song" loop preload="none"></audio>
-
-  <!-- ============================= LIGHTBOX ============================= -->
-  <div class="lightbox" id="lightbox" hidden>
-    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
-    <button class="lb-prev" id="lb-prev" aria-label="Previous">&#8249;</button>
-    <img id="lb-img" alt="" />
-    <button class="lb-next" id="lb-next" aria-label="Next">&#8250;</button>
-    <div class="lb-caption" id="lb-caption"></div>
-  </div>
-
-</div>
+</main>
 
 <script src="js/app.js"></script>
 </body>

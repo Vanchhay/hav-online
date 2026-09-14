@@ -1,2 +1,5 @@
 .DS_Store
 .claude
+
+# Full-resolution camera originals — kept locally, never committed (185 MB)
+assets/img/full/
