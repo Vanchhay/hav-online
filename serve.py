@@ -9,7 +9,21 @@ import os, functools, http.server, socket, socketserver
 ROOT = "/Users/vanchhay/Documents/wedding-web"
 os.chdir(ROOT)
 
-Handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=ROOT)
+class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+    """Never let a browser cache during development.
+
+    A long-lived desktop tab holding an old style.css or app.js looks exactly
+    like a code bug, and costs far more time than the bytes ever save.
+    """
+
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
+
+Handler = functools.partial(NoCacheHandler, directory=ROOT)
 Handler.extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
                           ".svg": "image/svg+xml"}
 
