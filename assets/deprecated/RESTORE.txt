@@ -1,0 +1,9 @@
+Moved out of the way because nita.html (and css/simple-nita.css,
+js/simple-nita.js) does not reference them.
+
+Nothing was deleted. To put everything back exactly where it was:
+
+    cd /Users/vanchhay/Documents/wedding-web
+    rsync -a assets/deprecated/ assets/ --exclude RESTORE.txt && rm -rf assets/deprecated
+
+120 files moved.

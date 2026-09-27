@@ -1,0 +1,1509 @@
+/* ============================================================
+   Wedding invitation — fixed stage, scrolling content.
+
+   Layout is one idea repeated: a section is a curtain, the
+   content, and a curtain. Nothing is position:fixed except the
+   paper, because the curtains are identical on every section
+   and full height — so they appear to stand still on their own.
+   ============================================================ */
+
+:root{
+  --paper:      #efe7d8;   /* shows before the background image loads */
+  --content-w:  60%;       /* desktop: content column width */
+
+  /* ---- curtains: the three knobs ------------------------------
+     The band is sized from its HEIGHT, not its width. Each drape
+     keeps its own aspect ratio (--curtain-ar, set per side below),
+     so the width simply follows:  width = height x ratio.
+     That is what guarantees full coverage on any screen — the art
+     is always exactly as tall as --curtain-h, never shorter.
+
+     --curtain-h      how tall each drape hangs, as a % of the
+                      LIVE viewport — not svh, lvh or dvh. Those are
+                      all guesses at a number iOS keeps changing as
+                      the address bar slides; every one of them is
+                      wrong during the slide, and that is the bare
+                      strip along the bottom. .curtains is fixed at
+                      inset:0, so it IS the viewport, whatever the
+                      browser currently thinks that is, and 100%
+                      of it can never fall short. The default
+                      overshoots a little: the excess hangs below
+                      the fold where nothing can see it, which
+                      covers the browser's own mid-slide lag too.
+     --curtain-max-w  a hard cap on band width, for narrow screens
+                      where a full-height drape gets wide. Capping
+                      CROPS the inner edge (the soft side), it does
+                      not shrink the art. 100vw = no cap, show it
+                      whole. (Must be a length — `none` is not valid
+                      inside max-width and would void the rule.)
+     --curtain-fade   where the inner edge fades out. 100% = no
+                      fade, trust the PNG's own alpha. 50% = soft.
+     -------------------------------------------------------------- */
+  --curtain-h:      100lvh;
+  --curtain-max-w:  85vw;
+  --curtain-fade:   100%;
+  /* Air above and below every panel. It was 0, which let each design run
+     to within a few vh of the next one — nothing separated two pages, so
+     on a desktop screen you were always reading the bottom of one and the
+     top of the next at the same time. .page is border-box, so this is
+     carved out of the 100svh panel rather than added to it: one design
+     still occupies exactly one screen. */
+  --gap:        7vh;
+  /* What is actually left for a design once the panel has taken its air.
+     Every height limit on the page is expressed against this one value,
+     so changing --gap can never leave a stale number behind. */
+  --panel-h:    calc(100svh - (2 * var(--gap)));
+  --slot-bg:    #e9e3d4;
+  --slot-line:  rgba(90,84,64,.30);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  -webkit-text-size-adjust:100%;
+  scroll-behavior:smooth;
+  /* Free scroll, deliberately. Mandatory snapping fought every flick on a
+     phone — the browser's own momentum and the snap both wanted the scroll
+     position, and the result stuttered. Each panel is still a screen tall,
+     so it reads a page at a time without anything grabbing the scroll. */
+  overscroll-behavior-y:none;
+}
+
+body{
+  margin:0;
+  color:#4c5340;
+  font-family:"Noto Sans Khmer","Hanuman",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+
+  /* The paper never moves. background-attachment:fixed is ignored on iOS,
+     so the fallback there is simply a background that scrolls with the
+     page — which still looks right, since the texture is uniform. */
+  background-color:var(--paper);
+  background-image:url('../assets/img/n-bg-small.png');
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+
+img{ display:block; max-width:100%; }
+
+/* ---------- the repeating frame ---------------------------- */
+
+.page{
+  position:relative;
+  /* svh, not dvh: the small-viewport unit is the one that does NOT change
+     when a mobile address bar slides away. With dvh every panel resized
+     mid-scroll, so the whole column shifted under your thumb — that is the
+     jitter. min-height rather than height so nothing can ever be cropped. */
+  min-height:100svh;
+  display:flex;
+  align-items:center;         /* design floats in the middle of its panel */
+  justify-content:center;
+  padding:var(--gap) 0;
+}
+
+/* Fixed to the viewport, above the content. Anchored here rather than inside
+   each section: a curtain that lives in a section scrolls with it, which is
+   what made the whole page look like it was sliding. */
+.curtains{
+  position:fixed;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+}
+
+/* Scoped under .curtains on purpose: the generic .slot rule below also sets
+   position, and at equal specificity the later rule wins. That left these as
+   inline elements, where width simply does not apply, so each curtain spanned
+   the whole viewport. */
+.curtains .curtain{
+  position:absolute;
+  top:0;
+  /* Height first, from the parent — the parent is the viewport, so this
+     tracks the address bar sliding with no unit to get wrong. */
+  height:var(--curtain-h);
+  /* Then the width follows from that height. aspect-ratio does the
+     arithmetic against the used height, so the box always has the
+     artwork's own proportions and the image fills it without either
+     cropping or falling short. */
+  width:auto;
+  aspect-ratio:var(--curtain-ar);
+  max-width:var(--curtain-max-w);
+  overflow:hidden;
+}
+
+/* Each export has its own shape, so each side carries its own ratio.
+   Re-export a drape at a new size and change the two numbers here —
+   they are just the PNG's pixel width and height. */
+.curtains .curtain--l{ left:0;  --curtain-ar:689 / 2400; }
+.curtains .curtain--r{ right:0; --curtain-ar:427 / 2400; }
+
+/* The box already has the image's proportions, so `cover` crops nothing
+   in the normal case — it is here only for when --curtain-max-w bites on a
+   narrow screen, and then it takes the slice off the inner edge rather
+   than squashing the drape. */
+.curtain > img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.curtain--l > img{ object-position:left  center; }
+.curtain--r > img{ object-position:right center; }
+
+/* Force the inner edge to zero opacity in CSS rather than trusting the PNG's
+   own alpha to survive the crop. `cover` slices the art at whatever width the
+   box happens to be, and it was landing while the drape was still ~27% opaque
+   — so it stopped dead and drew a vertical line. A mask fades the last 45%
+   of the band out no matter where the crop falls. */
+/* With `contain` nothing is sliced, so the artwork's own alpha already
+   fades the inner edge and --curtain-fade defaults to 100% — the mask is
+   present but does nothing. Drop it to 50% (or any %) if you switch back
+   to `cover`, or just want a softer join. */
+.curtains .curtain--l{
+  -webkit-mask-image:linear-gradient(to right, #000 var(--curtain-fade), transparent 100%);
+          mask-image:linear-gradient(to right, #000 var(--curtain-fade), transparent 100%);
+}
+.curtains .curtain--r{
+  -webkit-mask-image:linear-gradient(to left, #000 var(--curtain-fade), transparent 100%);
+          mask-image:linear-gradient(to left, #000 var(--curtain-fade), transparent 100%);
+}
+
+/* ---------- top haze --------------------------------------- */
+/* Off by default; the phone breakpoint switches it on. Between the content
+   (z-index 2) and the curtains (5), so the design fades under it while the
+   drapes stay crisp on top.
+
+   The mask is what makes it read as haze rather than a bar: it fades the
+   whole layer — its tint AND its blur — out downward, so there is no edge
+   where the effect stops. The modifier carries the direction, so a matching
+   bottom band is a second rule pointing the other way. */
+.veil{
+  display:none;
+  position:fixed;
+  left:0; right:0;
+  height:var(--veil-h);
+  z-index:4;
+  pointer-events:none;
+
+  -webkit-backdrop-filter:blur(9px);
+          backdrop-filter:blur(9px);
+}
+
+.veil--t{
+  top:0;
+  background:linear-gradient(to bottom,
+    var(--paper) 0%,
+    rgba(239,231,216,.72) 40%,
+    rgba(239,231,216,0) 100%);
+  -webkit-mask-image:linear-gradient(to bottom, #000 30%, transparent 100%);
+          mask-image:linear-gradient(to bottom, #000 30%, transparent 100%);
+}
+
+
+.content{
+  position:relative;
+  z-index:2;
+  width:var(--content-w);
+  display:flex;
+  justify-content:center;
+}
+
+/* Bound by width and height at once. Your designs are ~0.71 wide-to-tall and
+   a phone is ~0.46, so whichever limit bites first wins and the panel can
+   never overflow its screen. */
+.content > img,
+.content > .pin > img{
+  width:auto;
+  height:auto;
+  max-width:100%;
+  /* The 4vh is the design's own margin inside the panel's usable height,
+     so it never quite touches the air it is sitting in. */
+  max-height:calc(var(--panel-h) - 4vh);
+
+  /* The design carries its own paper out to its edges, so it meets the page
+     background at a hard vertical boundary. Even when the two creams match in
+     tone, any difference in texture or compression shows as a line. Feathering
+     the outer 5% dissolves that join. Your designs keep their content well
+     inside this, so nothing is clipped. */
+  -webkit-mask-image:linear-gradient(to right,
+    transparent 0, #000 5%, #000 95%, transparent 100%);
+          mask-image:linear-gradient(to right,
+    transparent 0, #000 5%, #000 95%, transparent 100%);
+}
+
+/* ---------- slide in --------------------------------------- */
+/* The class is added by JS, so with JS off nothing is ever hidden. */
+
+@media (prefers-reduced-motion: no-preference){
+  .content.reveal{
+    opacity:0;
+    transform:translateY(30px);
+    transition:opacity .9s ease, transform .9s cubic-bezier(.22,.61,.36,1);
+  }
+  .content.reveal.is-in{ opacity:1; transform:none; }
+}
+
+/* ---------- empty slots ------------------------------------ */
+
+.slot{ position:relative; }
+.slot.is-empty img{ display:none; }
+
+.content.is-empty{
+  width:var(--content-w);
+  height:calc(var(--panel-h) - 4vh);
+  border:1px dashed var(--slot-line);
+  border-radius:2px;
+  background:var(--slot-bg);
+}
+.content.is-empty::after{
+  content:attr(data-slot);
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font:500 12px/1.4 ui-monospace,Menlo,monospace;
+  color:rgba(90,84,64,.55);
+}
+/* Curtains are optional: before the artwork exists, show nothing rather
+   than a dashed box down both edges of every page. */
+.curtain.is-empty{ background:none; border:0; }
+.curtain.is-empty::after{ content:none; }
+
+/* ---------- phones ----------------------------------------- */
+
+@media (max-width:767px){
+  :root{
+    /* Wider than the 74% that left ~47% of the screen bare. The curtains now
+       overlap the content's edges instead of sitting beside it, which also
+       feathers the join between the design's own paper and the background. */
+    --content-w:88%;
+    /* The knob for .content--wide-sm. Tune this one number to re-scale
+       every widened section on a phone at once; a single section can
+       still override it on itself. */
+    --content-w-sm:96%;
+    /* A full-height drape is ~29svh wide on the left, which on a phone is
+       most of the screen. It reads fine, because the inner half of the art
+       is nearly transparent and the text sits on top of it. Uncomment to
+       cap it instead — that crops the inner edge, it does not shrink it.
+       --curtain-max-w:42vw; */
+    /* How early the design starts dissolving. Taller = disappears sooner. */
+    --veil-h:15svh;
+  }
+
+  .veil{ display:block; }
+
+  /* The designs are ~0.64 wide-to-tall and a phone is ~0.46, so width always
+     binds first: an 88%-wide design fills only about 63% of the panel's
+     height. Forcing the panel to a whole screen just banks the difference as
+     dead space above and below. Size the panel to the design instead and set
+     the breathing room explicitly. Free scroll makes this read fine — the
+     curtains are fixed to the viewport, so the frame still never moves. */
+  /* The phone twin of .content--wide. A tall design is height-capped even
+     here — an 0.5-ratio artwork at 88% of a phone is taller than the
+     screen allows, so it renders narrower than the column it was given.
+     Lifting the cap is what actually widens it; the section then grows
+     past a viewport, which is the same trade the desktop modifier makes.
+
+     Both modifiers can sit on one section: they live in opposite
+     breakpoints and never meet. */
+  .content--wide-sm{
+    width:var(--content-w-sm, 50%);
+    margin-inline:auto;
+  }
+  .content--wide-sm > img,
+  .content--wide-sm > .pin > img{
+    width:85%;
+    max-height:none;
+  }
+  .content--wide-sm > .pin{ width:100%; }
+
+  /* --gap is a desktop measure: on a phone the panel is already sized to
+     its design, so the separation is set here directly and kept tight. */
+  .page{
+    min-height:0;
+    padding:3vh 0;
+  }
+
+  /* The opening panel keeps a full screen, so the invitation arrives on its
+     own rather than with the next design already peeking in underneath. */
+  .page:first-child{ min-height:100svh; padding:0; }
+}
+
+/* ============================================================
+   5 · COUNTDOWN / SAVE THE DATE
+
+   The one page that is built, not exported, because the clock
+   ticks. Sizes are in cqw against .n5, so the block scales as a
+   single drawing — change --content-w and every number, letter
+   and calendar cell follows, with no second set of breakpoints.
+   ============================================================ */
+
+:root{
+  --n5-green: #4a5c33;
+  --n5-olive: #6f7a33;
+  --n5-red:   #6f171c;
+  --serif:    "Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:     "Montserrat",system-ui,-apple-system,sans-serif;
+}
+
+/* A built page has no artwork of its own to feather, so it skips the
+   edge mask and just gets to be full width of its column. */
+/* A design that is allowed to be as wide as the gallery instead of being
+   sized down to fit one screen. Width becomes the binding limit, so the
+   panel grows past a viewport and the section scrolls — which is the whole
+   trade: a 1102x2356 artwork cannot be both 62% of a laptop wide AND one
+   screen tall. Desktop only; phones already show these full width. */
+@media (min-width:768px){
+  .content--wide{
+    width:var(--gallery-w, 40%);
+    margin-inline:auto;
+  }
+  .content--wide > img,
+  .content--wide > .pin > img{
+    width:100%;
+    max-height:none;
+  }
+  /* .pin shrink-wraps its image everywhere else; here the image is meant
+     to fill the column, so the wrapper has to be told to as well. */
+  .content--wide > .pin{ width:100%; }
+}
+
+.content--built{
+  display:block;
+  /* A built section is a tall poster — everything inside it is sized in
+     cqw, so its height is a fixed multiple of its width and the block
+     would happily run past the bottom of the screen. Measured, the
+     countdown is 1.777x as tall as it is wide, so 0.55 is the widest it
+     can be and still land inside one panel. Width is capped by the
+     available HEIGHT, exactly as the curtains are; the column width only
+     wins on a screen tall enough for it to. */
+  --built-ar:.55;
+  width:min(var(--content-w), calc(var(--panel-h) * var(--built-ar)));
+  margin-inline:auto;
+}
+
+.n5{
+  container-type:inline-size;
+  width:100%;
+  text-align:center;
+}
+
+/* ---------- photo strip + clock ---------------------------- */
+
+.n5__photos{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:min(1.2cqw,10px);
+}
+
+.n5__photo{
+  margin:0;
+  overflow:hidden;
+  aspect-ratio:2/5;          /* tall portrait crops, as in the design */
+  background:var(--slot-bg);
+}
+.n5__photo > img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* The clock lies across the foot of the strip, one row for all three
+   photos — that overlap is the whole idea of the layout. */
+.n5__countdown{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  z-index:2;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:min(1.5cqw,14px);
+  padding:0 min(2cqw,18px) min(2.5cqw,22px);
+  color:#fff;
+  font-family:var(--sans);
+  font-weight:400;
+  /* Read over a bright photo as well as a dark one. */
+  text-shadow:0 1px 14px rgba(0,0,0,.45);
+}
+
+/* A scrim rather than a solid bar: it dies out upward, so it never
+   draws a horizontal line across the photographs. */
+.n5__countdown::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:220%;
+  z-index:-1;
+  background:linear-gradient(to top, rgba(0,0,0,.34), rgba(0,0,0,0));
+  pointer-events:none;
+}
+
+.cd__unit{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:0;
+}
+
+.cd__num{
+  font-size:min(14cqw,104px);
+  line-height:.95;
+  /* Digits must not shuffle sideways every second. */
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+
+.cd__label{
+  margin-top:min(1cqw,8px);
+  font-size:min(3.3cqw,20px);
+  letter-spacing:.04em;
+}
+
+.cd__sep{
+  font-size:min(11cqw,80px);
+  line-height:1.2;
+}
+
+/* ---------- title ------------------------------------------ */
+
+.n5__title{
+  margin:min(5cqw,38px) 0 0;
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:min(6.4cqw,44px);
+  letter-spacing:.14em;
+  line-height:1.2;
+}
+.n5__title .is-green{ color:var(--n5-green); }
+.n5__title .is-red{   color:var(--n5-red); }
+
+/* ---------- line-art mark ---------------------------------- */
+
+.n5__mark{
+  display:flex;
+  justify-content:center;
+  margin:min(3cqw,24px) auto;
+}
+.n5__mark > img{
+  width:min(20cqw,150px);
+  height:auto;
+}
+
+/* ---------- save the date ---------------------------------- */
+
+.n5__save{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:700;
+  font-size:min(11.5cqw,82px);
+  line-height:1.05;
+  letter-spacing:.01em;
+  color:var(--n5-olive);
+}
+
+.n5__month{
+  margin:min(1.5cqw,12px) 0 0;
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:min(6.6cqw,46px);
+  color:var(--n5-red);
+}
+
+/* ---------- calendar --------------------------------------- */
+
+.cal{
+  width:min(72cqw,560px);
+  margin:min(5cqw,38px) auto 0;
+  font-family:var(--sans);
+}
+
+.cal__head,
+.cal__grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  justify-items:center;
+  align-items:center;
+}
+
+.cal__head{
+  font-size:min(2.9cqw,19px);
+  font-weight:700;
+  letter-spacing:.06em;
+  color:var(--n5-red);
+  margin-bottom:min(3cqw,22px);
+}
+
+.cal__grid{
+  row-gap:min(3.4cqw,26px);
+  font-size:min(3.1cqw,21px);
+  font-weight:500;
+  color:var(--n5-olive);
+}
+
+.cal__day{
+  position:relative;
+  display:grid;
+  place-items:center;
+  /* Square cells keep the ring around 22 centred whatever the digits are. */
+  width:1.9em;
+  height:1.9em;
+  line-height:1;
+}
+
+.cal__day--mark{
+  color:var(--n5-red);
+  font-weight:700;
+  font-size:1.25em;
+}
+
+/* Drawn behind the numeral rather than as a border, so it can be a heart
+   and still leave the digits sitting on the same baseline as the row. */
+.cal__heart{
+  position:absolute;
+  inset:-6%;
+  width:112%;
+  height:112%;
+  color:var(--n5-red);
+  pointer-events:none;
+}
+
+/* ---------- empty slots on this page ----------------------- */
+
+.n5__photo.is-empty{
+  border:1px dashed var(--slot-line);
+}
+.n5__photo.is-empty::after{
+  content:attr(data-slot);
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font:500 11px/1.4 ui-monospace,Menlo,monospace;
+  color:rgba(90,84,64,.55);
+  text-align:center;
+}
+/* Optional art shows nothing until the file exists. */
+.slot--optional.is-empty{ min-height:0; }
+
+/* ---------- phones ----------------------------------------- */
+
+@media (max-width:767px){
+  /* The page rule above collapses .page to its content on phones; this one
+     is taller than a screen, so give it back its own breathing room. */
+  .content--built{ padding:4vh 0; }
+
+  /* Four two-digit numbers plus colons cannot span a phone at the desktop
+     ratio without the labels colliding. Shrink the gap, not the numerals. */
+  .n5__countdown{ gap:min(1cqw,6px); }
+  .cd__label{ font-size:min(3.1cqw,13px); }
+  .cal{ width:96cqw; }
+  .cal__head{ font-size:min(3.1cqw,14px); }
+  .cal__grid{ font-size:min(3.4cqw,15px); }
+}
+
+/* ============================================================
+   1 · INVITATION
+
+   A stack of images on the shared paper. Two knobs per block and
+   nothing else: --w is how wide it sits in the column, --mt is
+   the air above it. Both are in cqw, so the whole page keeps its
+   proportions from a phone to a desktop — the rhythm between the
+   blocks never has to be re-tuned per breakpoint.
+   ============================================================ */
+
+.n1{
+  container-type:inline-size;
+  width:100%;
+  text-align:center;
+}
+
+.n1__logo,
+.n1__item{
+  display:flex;
+  justify-content:center;
+  margin:var(--mt,0) auto 0;
+}
+
+.n1__logo > img,
+.n1__item > img{
+  width:var(--w,100%);
+  height:auto;
+}
+
+/* Proportions read off the original export (724px wide), so the built
+   page lands on the same balance as the flat design. */
+.n1__logo          { --w:58%; }
+.n1__item--t1      { --w:88%; --mt:6cqw; }   /* parents */
+.n1__item--t2      { --w:62%; --mt:8cqw; }   /* honorific line + rule */
+.n1__item--t3      { --w:94%; --mt:7cqw; }   /* invitation paragraph */
+.n1__item--t4      { --w:82%; --mt:7cqw; }   /* the couple */
+.n1__item--t5      { --w:96%; --mt:8cqw; }   /* date, venue, closing */
+
+/* A block that has no file yet keeps its place in the stack rather than
+   collapsing, so the rhythm of the page is still readable while you work. */
+.n1__logo.is-empty,
+.n1__item.is-empty{
+  position:relative;
+  width:var(--w,100%);
+  min-height:var(--h,9cqw);
+  border:1px dashed var(--slot-line);
+  background:var(--slot-bg);
+}
+.n1__logo.is-empty{ --h:34cqw; }
+.n1__item--t1.is-empty{ --h:14cqw; }
+.n1__item--t2.is-empty{ --h:10cqw; }
+.n1__item--t3.is-empty{ --h:20cqw; }
+.n1__item--t4.is-empty{ --h:16cqw; }
+.n1__item--t5.is-empty{ --h:24cqw; }
+
+.n1__logo.is-empty::after,
+.n1__item.is-empty::after{
+  content:attr(data-slot);
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font:500 12px/1.4 ui-monospace,Menlo,monospace;
+  color:rgba(90,84,64,.55);
+}
+
+/* ============================================================
+   6 · GALLERY
+
+   A mosaic on a six-column grid. Four tile shapes, and a shape
+   is the only thing a photo needs to know about the layout:
+
+     hero     full width, landscape   — opens the section
+     wide     half width, landscape
+     feature  half width, portrait
+     tall     a third,    portrait    — the working rhythm
+
+   Re-order the photos by swapping a class. Nothing below cares
+   which photo is where.
+   ============================================================ */
+
+.content--gallery{
+  display:block;
+  /* Wider than a design page, but not past the curtains: at full height
+     each drape is about 19% of a desktop window, so 62% is the widest the
+     photographs can be and still sit on clean paper. */
+  width:var(--gallery-w,62%);
+  margin-inline:auto;
+}
+
+.gal{
+  container-type:inline-size;
+  width:100%;
+}
+
+/* ---------- heading ---------------------------------------- */
+
+.gal__head{
+  text-align:center;
+  margin:0 0 min(6cqw,48px);
+}
+
+.gal__kicker{
+  margin:0 0 min(1.5cqw,10px);
+  font-family:var(--sans);
+  font-weight:600;
+  font-size:min(2.6cqw,15px);
+  letter-spacing:.34em;
+  text-indent:.34em;          /* the last letter's tracking, given back */
+  color:var(--n5-red);
+}
+
+.gal__title{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:700;
+  font-size:min(9cqw,64px);
+  line-height:1;
+  color:var(--n5-olive);
+}
+
+/* ---------- the mosaic ------------------------------------- */
+
+.gal__grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:min(1.8cqw,16px);
+}
+
+.gal__item{
+  position:relative;
+  margin:0;
+  overflow:hidden;
+  border-radius:2px;
+  background:var(--slot-bg);
+  /* The shape sets both of these; the tile itself is generic. */
+  grid-column:span var(--span,2);
+  aspect-ratio:var(--ar,2 / 3);
+  cursor:zoom-in;
+}
+
+.gal__item--hero   { --span:6; --ar:3 / 2; }
+.gal__item--wide   { --span:3; --ar:3 / 2; }
+.gal__item--feature{ --span:3; --ar:2 / 3; }
+.gal__item--tall   { --span:2; --ar:2 / 3; }
+.gal__item > img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  /* A slow push rather than a snap: the photograph should feel like it is
+     leaning toward you, not flinching. */
+  transition:transform .7s cubic-bezier(.22,.61,.36,1), filter .7s ease;
+}
+
+@media (hover:hover){
+  .gal__item:hover > img{
+    transform:scale(1.05);
+    filter:saturate(1.06);
+  }
+}
+
+/* ---------- arriving --------------------------------------- */
+/* Staggered off --i in the markup, so tiles land in reading order rather
+   than all at once. Capped, or the last tile of a long grid would wait. */
+
+/* The class is added by JS, exactly like .content.reveal: with JS off, or
+   without IntersectionObserver, nothing is ever hidden in the first place. */
+@media (prefers-reduced-motion: no-preference){
+  .gal__item.reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.22,.61,.36,1);
+    transition-delay:calc(min(var(--i,0), 6) * 70ms);
+  }
+  .gal__item.reveal.is-in{ opacity:1; transform:none; }
+}
+
+/* ---------- empty slots ------------------------------------ */
+
+.gal__item.is-empty{
+  border:1px dashed var(--slot-line);
+  cursor:default;
+}
+.gal__item.is-empty::after{
+  content:attr(data-slot);
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font:500 12px/1.4 ui-monospace,Menlo,monospace;
+  color:rgba(90,84,64,.55);
+}
+
+/* ---------- the end of the deck ---------------------------- */
+/* Every other page butts straight into the next one, so none of them has
+   ever needed a floor. The last one does: without it the final row of
+   photographs sits on the very bottom edge of the document and the page
+   reads as cut off rather than finished. */
+
+.deck > .page:last-child{
+  --deck-floor:max(14vh,90px);
+  padding-bottom:var(--deck-floor);
+  /* Spend the floor out of this panel's own budget rather than on top of
+     it, or the last section is the one page on the site taller than a
+     screen for no reason the reader can see. */
+  --panel-h:calc(100svh - var(--gap) - var(--deck-floor));
+}
+
+/* ---------- lightbox --------------------------------------- */
+/* Outside .deck in the markup, and above the curtains here, so nothing
+   the page paints on top of itself can land over an opened photograph. */
+
+.lb{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:min(2vw,24px);
+  padding:max(3vh,18px) max(2vw,14px);
+  background:rgba(28,26,20,.92);
+  -webkit-backdrop-filter:blur(6px);
+          backdrop-filter:blur(6px);
+}
+.lb[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: no-preference){
+  .lb{ animation:lb-in .28s ease both; }
+  @keyframes lb-in{ from{ opacity:0; } to{ opacity:1; } }
+}
+
+.lb__stage{
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:min(2vh,14px);
+  min-width:0;
+}
+
+.lb__img{
+  max-width:100%;
+  /* Height is the binding limit for a portrait photograph on a laptop, so
+     both limits are set and whichever bites first wins. */
+  max-height:82svh;
+  width:auto;
+  object-fit:contain;
+  border-radius:2px;
+}
+
+.lb__caption{
+  font-family:var(--sans);
+  font-size:13px;
+  letter-spacing:.04em;
+  color:rgba(255,255,255,.72);
+  text-align:center;
+}
+
+.lb__nav,
+.lb__close{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.10);
+  color:#fff;
+  font:300 30px/1 var(--sans);
+  cursor:pointer;
+  transition:background .2s ease;
+}
+.lb__nav:hover,
+.lb__close:hover{ background:rgba(255,255,255,.22); }
+
+.lb__close{
+  position:absolute;
+  top:max(2vh,12px);
+  right:max(2vw,12px);
+  font-size:26px;
+}
+
+/* ---------- phones ----------------------------------------- */
+
+@media (max-width:767px){
+  .content--gallery{ --gallery-w:92%; padding:6vh 0; }
+
+  /* Two columns, and the four shapes collapse onto them: the landscapes
+     go full width because a 3:2 crop at half a phone's width is a stamp,
+     the portraits pair up. */
+  /* `dense` is a safety net, not the layout: with the counts above there
+     is nothing for it to backfill. It only earns its keep the day a photo
+     is added or re-ordered and a run turns odd again. */
+  .gal__grid{
+    grid-template-columns:repeat(2,1fr);
+    grid-auto-flow:dense;
+  }
+
+  .gal__item--hero,
+  .gal__item--wide  { --span:2; }
+  .gal__item--feature,
+  .gal__item--tall  { --span:1; }
+
+  /* Two columns only balance if each run of half-width tiles has an even
+     count — an odd one leaves the last tile alone and the next full-width
+     tile wraps past the hole. The opening run is five, so its most scenic
+     photo is promoted to a full-width band: that fixes the count and
+     breaks up the rhythm at the same time. The closing run is four and
+     needs nothing. */
+  .gal__item--wide-sm{ --span:2; --ar:4 / 5; }
+
+  /* Thumb-sized targets, and the arrows move off the sides of the photo
+     where there is no room for them. */
+  .lb{ flex-wrap:wrap; }
+  .lb__stage{ order:1; flex:1 0 100%; }
+  .lb__nav{ order:2; width:52px; height:52px; }
+}
+
+/* ============================================================
+   0 · COVER
+
+   The silk erases outward from behind the seal, and the seal is
+   the one thing that survives it. Order matters: words go, then
+   the frame, then the silk, and the crest is alone on top of the
+   invitation for half a second before it lifts. That half second
+   is what makes it read as a seal being broken rather than a
+   page cross-fading.
+
+   Everything is sized in cqw against .cover__col, so the whole
+   composition holds its proportions from a phone to a desktop.
+   ============================================================ */
+
+:root{
+  /* The composition is wider than it is tall (0.68 h/w), so on a laptop
+     the HEIGHT is what binds — hence a multiple of svh, not a % of width.
+     One knob for the whole cover: everything else follows from it. */
+  --cover-w:      min(86%, calc(100svh * 1.02));
+  --cover-ink:    #7d5a2c;   /* the small caps */
+  --cover-name:   #6f4d22;   /* GUEST NAME */
+  --cover-line:   rgba(150,110,48,.55);
+  --cover-frame:  4.2%;      /* the frame's inset, left and right */
+  --cover-frame-y:5.5%;      /* and top and bottom */
+}
+
+.cover{
+  position:fixed;
+  inset:0;
+  /* Above the curtains (5) and the veil (4), below the lightbox (50). */
+  z-index:30;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  /* No background of its own. It had --paper here as a pre-load fallback,
+     which defeated the whole idea: erasing the silk revealed a sheet of
+     cream rather than the invitation. The fallback belongs on the silk
+     layer, where the erase takes it away too. */
+}
+
+/* ---------- the silk --------------------------------------- */
+
+.cover__silk{
+  position:absolute;
+  inset:0;
+  background:var(--paper) url('../assets/img/cover-bg.jpg') center / cover no-repeat;
+
+  /* Two mask layers composited to "opaque everywhere, with a hole".
+     A single radial gradient cannot do this: outside its own box a
+     no-repeat mask is transparent, so at size 0 the silk would vanish
+     instead of being whole. So: a solid layer underneath, a growing
+     disc on top, and XOR between them. At size 0 the disc paints
+     nothing, XOR leaves the solid alone, and the silk is untouched. */
+  -webkit-mask-image:radial-gradient(circle, #000 0 38%, rgba(0,0,0,0) 76%),
+                     linear-gradient(#000,#000);
+          mask-image:radial-gradient(circle, #000 0 38%, rgba(0,0,0,0) 76%),
+                     linear-gradient(#000,#000);
+  -webkit-mask-repeat:no-repeat, no-repeat;
+          mask-repeat:no-repeat, no-repeat;
+  /* Percentage positions keep the disc's centre pinned to the seal while
+     its size grows. JS writes these two from the crest's real position. */
+  -webkit-mask-position:var(--erase-x,50%) var(--erase-y,58%), 0 0;
+          mask-position:var(--erase-x,50%) var(--erase-y,58%), 0 0;
+  -webkit-mask-size:0% 0%, 100% 100%;
+          mask-size:0% 0%, 100% 100%;
+  -webkit-mask-composite:xor, source-over;   /* legacy WebKit spelling */
+          mask-composite:exclude, add;       /* the standard one wins */
+}
+
+/* A slow specular travelling across the satin, so the cover is alive
+   before anything is touched. Sits under the frame and the type. */
+.cover__silk::after{
+  content:"";
+  position:absolute;
+  inset:-20%;
+  background:linear-gradient(106deg,
+    rgba(255,255,255,0) 38%,
+    rgba(255,255,255,.22) 50%,
+    rgba(255,255,255,0) 62%);
+  pointer-events:none;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .cover__silk::after{ animation:cover-sheen 9s ease-in-out infinite; }
+  @keyframes cover-sheen{
+    0%  { transform:translateX(-34%); opacity:0; }
+    18% { opacity:1; }
+    52% { opacity:1; }
+    70% { transform:translateX(34%); opacity:0; }
+    /* the rest of the cycle is the pause before it comes round again */
+    100%{ transform:translateX(34%); opacity:0; }
+  }
+}
+
+/* ---------- the frame -------------------------------------- */
+
+.cover__frame{
+  position:absolute;
+  top:var(--cover-frame-y);   bottom:var(--cover-frame-y);
+  left:var(--cover-frame);    right:var(--cover-frame);
+  pointer-events:none;
+}
+
+.cover__rule{
+  position:absolute;
+  background:var(--cover-line);
+  /* Each retracts toward the far end of its own run, so the four of them
+     read as one turning motion rather than four separate fades. */
+  transition:transform .7s cubic-bezier(.65,0,.35,1);
+}
+.cover__rule--t{ top:0;    left:0;  width:100%; height:1px; transform-origin:left   center; }
+.cover__rule--b{ bottom:0; left:0;  width:100%; height:1px; transform-origin:right  center; }
+.cover__rule--l{ top:0;    left:0;  width:1px;  height:100%; transform-origin:center bottom; }
+.cover__rule--r{ top:0;    right:0; width:1px;  height:100%; transform-origin:center top; }
+
+/* ---------- the type --------------------------------------- */
+
+.cover__col{
+  position:relative;
+  z-index:2;
+  container-type:inline-size;
+  width:var(--cover-w);
+  text-align:center;
+}
+
+.cover__line,
+.cover__guest{
+  /* Each fades and drifts on its own delay; the delays live on the
+     modifiers below, so the order of the exit is readable in one place. */
+  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1);
+}
+
+.cover__line{
+  margin:0;
+  font-family:var(--serif);
+  font-weight:500;
+  /* The design's 1.6% of width would be 5px on a phone. A floor keeps the
+     tracking legible on a small screen at the cost of being a shade
+     larger than the artwork there. */
+  font-size:max(11px, 1.6cqw);
+  letter-spacing:.28em;
+  text-indent:.28em;          /* give back the trailing letter's tracking */
+  line-height:1.5;
+  color:var(--cover-ink);
+}
+
+.cover__guest{
+  margin:3.2cqw 0 0;
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:max(28px, 6.6cqw);
+  letter-spacing:.05em;
+  text-indent:.05em;
+  line-height:1.1;
+  color:var(--cover-name);
+  /* A long name must not blow the composition apart. */
+  overflow-wrap:break-word;
+}
+
+.cover__line--2{ margin-top:3.4cqw; }
+.cover__line--3{ margin-top:9cqw; }
+
+/* The design sets a hairline with a diamond between the crest and the
+   closing line. It is not in the crest artwork, so it is drawn here. */
+.cover__line--3::before{
+  content:"";
+  display:block;
+  width:16cqw;
+  height:5cqw;
+  margin:0 auto 4cqw;
+  background:
+    linear-gradient(var(--cover-line),var(--cover-line)) left  50% / 38% 1px no-repeat,
+    linear-gradient(var(--cover-line),var(--cover-line)) right 50% / 38% 1px no-repeat;
+  position:relative;
+}
+.cover__line--3::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  width:1.5cqw;
+  height:1.5cqw;
+  margin-left:-.75cqw;
+  margin-top:-10.4cqw;
+  background:var(--cover-line);
+  transform:rotate(45deg);
+}
+.cover__line--3{ position:relative; }
+
+/* ---------- the crest -------------------------------------- */
+
+.cover__crest{
+  position:relative;          /* the glow below is pinned inside this box */
+  display:block;
+  width:55cqw;
+  margin:9cqw auto 0;
+  padding:0;
+  border:0;
+  background:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .32s cubic-bezier(.34,1.3,.64,1), opacity .7s ease;
+}
+
+.cover__crest > img{
+  width:100%;
+  height:auto;
+  filter:drop-shadow(0 6px 14px rgba(90,62,20,.22));
+}
+
+/* The seal sits at 49.9% across and 46.0% down the crest artwork, not at
+   its centre — the sprigs hang lower than the wax. The glow is pinned to
+   the seal, not to the box. */
+.cover__crest::before{
+  content:"";
+  position:absolute;
+  left:49.9%; top:46%;
+  width:44cqw; height:44cqw;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(201,162,39,.30) 0%,
+    rgba(201,162,39,.10) 45%,
+    rgba(201,162,39,0) 70%);
+  pointer-events:none;
+  z-index:-1;
+}
+/* The wax itself catches the light. A circle pinned over the seal — 39.2%
+   of the crest's width is the seal's own diameter in the artwork — with a
+   narrow highlight travelling across it. This is what keeps the cover
+   alive between presses, without anything moving. */
+.cover__crest::after{
+  content:"";
+  position:absolute;
+  left:49.9%; top:46%;
+  width:39.2%;
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  /* Narrow and soft. A wide band washes the whole seal pale and the wax
+     stops looking like wax — this should read as one edge of light moving
+     over it, not as a highlight laid on top. */
+  background:linear-gradient(104deg,
+    rgba(255,255,255,0) 45%,
+    rgba(255,255,255,.34) 50%,
+    rgba(255,255,255,0) 55%);
+  background-size:300% 100%;
+  background-position:160% 0;
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .cover__crest::before{ animation:cover-breathe 3.4s ease-in-out infinite; }
+  @keyframes cover-breathe{
+    0%,100%{ opacity:.40; transform:translate(-50%,-50%) scale(.94); }
+    50%    { opacity:.95; transform:translate(-50%,-50%) scale(1.06); }
+  }
+
+  /* The hint is the gesture. Rather than a pulse — which says "look at me"
+     and nothing else — the wax takes a brief press and springs back, which
+     is the opening move of the real animation. A guest who watches it once
+     has already been shown what to do.
+
+     Almost all of the cycle is stillness: the dip occupies the last fifth,
+     so it reads as an occasional nudge rather than a loop. The press lives
+     on the image, leaving the button's own transform free for :hover and
+     :active, which must always win over an idle hint. */
+  .cover__crest > img{ animation:crest-press 4.6s cubic-bezier(.34,1.2,.64,1) infinite; }
+
+  @keyframes crest-press{
+    0%, 72%, 100%{ transform:none; }
+    79%          { transform:scale(.938); }   /* pressed into the paper */
+    88%          { transform:scale(1.03); }   /* springs past its rest size */
+    95%          { transform:scale(1); }
+  }
+
+  .cover__crest::after{ animation:crest-glint 5.8s ease-in-out infinite; }
+  @keyframes crest-glint{
+    0%, 55%{ background-position:160% 0; }
+    85%    { background-position:-160% 0; }
+    100%   { background-position:-160% 0; }
+  }
+
+  /* Nobody has touched it after a few seconds, so the hint stops being
+     polite: the same gesture, deeper and twice as often. Escalating beats
+     starting loud — a guest who was already reaching for it is never
+     nagged, and a guest who is stuck gets helped. */
+  .cover.is-nudging .cover__crest > img{
+    animation-duration:2.3s;
+  }
+  .cover.is-nudging .cover__crest::before{
+    animation-duration:1.9s;
+  }
+}
+
+/* A real pointer gets the real thing, and it outranks the idle hint. */
+.cover__crest:hover{ transform:scale(1.035); }
+.cover__crest:active{
+  transform:scale(.955);
+  transition-duration:.08s;    /* a press must feel immediate, not eased */
+}
+/* Once a pointer is on it the guest plainly knows it is a control, so the
+   nudging stops rather than fighting their own hover. */
+.cover__crest:hover > img,
+.cover__crest:hover::before,
+.cover__crest:hover::after{ animation-play-state:paused; }
+.cover__crest:focus-visible{
+  outline:2px solid var(--cover-line);
+  outline-offset:6px;
+  border-radius:4px;
+}
+
+/* ---------- opening ---------------------------------------- */
+/* One class drives the whole sequence. Read top to bottom, it is the
+   timeline: press, words, frame, silk, then the seal last. */
+
+.cover.is-opening{ pointer-events:none; }
+
+/* 0.00-0.30  the wax takes the press */
+.cover.is-opening .cover__crest{
+  animation:cover-seal 2.7s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes cover-seal{
+  0%   { transform:scale(1); }
+  11%  { transform:scale(.955); }     /* 0.30s — pressed */
+  26%  { transform:scale(1); }        /* 0.70s — released */
+  74%  { transform:scale(1); opacity:1; }   /* 2.00s — held alone */
+  100% { transform:scale(1.22); opacity:0; }
+}
+
+/* 0.15-0.95  the words retire, staggered, the name last */
+.cover.is-opening .cover__line,
+.cover.is-opening .cover__guest{
+  opacity:0;
+  transform:translateY(-10px);
+}
+.cover.is-opening .cover__line--1{ transition-delay:.15s; }
+.cover.is-opening .cover__line--2{ transition-delay:.23s; }
+.cover.is-opening .cover__line--3{ transition-delay:.31s; }
+.cover.is-opening .cover__guest { transition-delay:.45s; }
+
+/* 0.20-0.90  the frame retracts into its corners */
+.cover.is-opening .cover__rule{ transition-delay:.2s; }
+.cover.is-opening .cover__rule--t,
+.cover.is-opening .cover__rule--b{ transform:scaleX(0); }
+.cover.is-opening .cover__rule--l,
+.cover.is-opening .cover__rule--r{ transform:scaleY(0); }
+
+/* 0.50-2.10  the silk erases outward from the seal */
+.cover.is-opening .cover__silk{
+  animation:cover-erase 1.6s cubic-bezier(.36,0,.2,1) .5s forwards;
+}
+.cover.is-opening .cover__silk::after{ animation:none; opacity:0; }
+
+/* The hint is over the moment the seal is actually pressed — leaving it
+   running would fight cover-seal for the same transform. */
+.cover.is-opening .cover__crest > img,
+.cover.is-opening .cover__crest::before,
+.cover.is-opening .cover__crest::after{ animation:none; }
+
+@keyframes cover-erase{
+  from{ -webkit-mask-size:0% 0%,     100% 100%;
+                mask-size:0% 0%,     100% 100%; }
+  to  { -webkit-mask-size:520% 520%, 100% 100%;
+                mask-size:520% 520%, 100% 100%; }
+}
+
+/* The overlay itself goes at the very end, after the crest has lifted. */
+.cover.is-gone{
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.cover[hidden]{ display:none; }
+
+/* 1.60-2.40  the invitation settles in behind */
+.deck.is-arriving{
+  animation:deck-arrive .8s cubic-bezier(.22,.61,.36,1) 1.6s backwards;
+}
+@keyframes deck-arrive{
+  from{ opacity:0; transform:scale(.975); }
+  to  { opacity:1; transform:none; }
+}
+
+/* ---------- reduced motion --------------------------------- */
+/* No sequence at all: the cover is simply dismissed. The guest still
+   presses the seal, so the audio still has its gesture. */
+
+@media (prefers-reduced-motion: reduce){
+  .cover.is-opening{ opacity:0; transition:opacity .3s ease; }
+  .deck.is-arriving{ animation:none; }
+}
+
+/* ---------- phones ----------------------------------------- */
+
+@media (max-width:767px){
+  :root{
+    /* On a phone the column is width-bound, as the artwork intends. */
+    --cover-w:88%;
+    --cover-frame:5%;
+    --cover-frame-y:4.5%;
+  }
+}
+
+/* ============================================================
+   MUSIC TOGGLE
+
+   Sits above the curtains but below the cover and the lightbox,
+   so it can never land on top of an opened photograph or appear
+   over the unbroken seal.
+   ============================================================ */
+
+.music{
+  position:fixed;
+  right:max(16px, env(safe-area-inset-right, 0px));
+  bottom:max(16px, env(safe-area-inset-bottom, 0px));
+  z-index:20;
+
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  padding:0;
+  border:1px solid var(--cover-line);
+  border-radius:50%;
+  background:rgba(247,242,231,.66);
+  -webkit-backdrop-filter:blur(8px);
+          backdrop-filter:blur(8px);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+
+  /* Arrives with the music rather than snapping in. */
+  opacity:0;
+  transform:translateY(10px) scale(.9);
+  transition:opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1),
+             background .2s ease;
+}
+.music[hidden]{ display:none; }
+.music.is-ready{ opacity:1; transform:none; }
+.music:hover{ background:rgba(247,242,231,.9); }
+.music:focus-visible{ outline:2px solid var(--cover-line); outline-offset:4px; }
+
+/* ---------- the bars are the state ------------------------- */
+
+.music__bars{
+  display:flex;
+  align-items:flex-end;
+  gap:3px;
+  height:16px;
+}
+
+.music__bars > i{
+  width:3px;
+  height:30%;
+  border-radius:1px;
+  background:#8a6529;
+  /* Paused is flat and dim; nothing else is needed to read it, and it
+     stays legible where a crossed-out speaker icon would go muddy at
+     this size. */
+  opacity:.45;
+  transition:height .3s ease, opacity .3s ease;
+}
+
+.music.is-playing .music__bars > i{ opacity:1; }
+
+@media (prefers-reduced-motion: no-preference){
+  .music.is-playing .music__bars > i{
+    animation:music-bar .9s ease-in-out infinite;
+  }
+  .music.is-playing .music__bars > i:nth-child(2){ animation-delay:-.30s; }
+  .music.is-playing .music__bars > i:nth-child(3){ animation-delay:-.60s; }
+
+  @keyframes music-bar{
+    0%,100%{ height:26%; }
+    50%    { height:100%; }
+  }
+}
+
+/* Without motion the bars still say which state they are in, they just
+   hold it rather than dancing. */
+@media (prefers-reduced-motion: reduce){
+  .music.is-playing .music__bars > i:nth-child(1){ height:55%; }
+  .music.is-playing .music__bars > i:nth-child(2){ height:100%; }
+  .music.is-playing .music__bars > i:nth-child(3){ height:70%; }
+}
+
+/* ============================================================
+   MAP HOTSPOT
+
+   A tap target laid over the QR in the location design. The
+   numbers are read off the artwork file, as percentages, so the
+   target follows the image however it is scaled — nothing here
+   needs touching when the export changes size.
+   ============================================================ */
+
+.pin{
+  position:relative;
+  /* Shrink-wraps the image, which is what makes the percentages below
+     resolve against the artwork rather than against the column. */
+  display:inline-flex;
+  max-width:100%;
+}
+
+.pin__hit{
+  position:absolute;
+  /* Measured off long-location-1.png (996x1783). The box is centred on the
+     artwork's own centre line rather than merely wrapping what is inside
+     it, so the ring sits evenly: 16px of air to the left of the QR's grey
+     frame, 17px to the right. Wrapping alone produced 16 and 51, because
+     the label above is not quite as wide as the code below.
+
+     These are tied to this export. Re-crop the artwork and they must be
+     re-measured, or the ring drifts off the code again. */
+  left:20.58%;
+  top:64.05%;
+  width:58.84%;
+  height:35.95%;
+  border-radius:8px;
+  /* Invisible by default: the design already says "Scan for location",
+     and a box drawn over the code would fight the artwork. */
+  background:transparent;
+  outline-offset:4px;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .25s ease, box-shadow .25s ease;
+}
+
+@media (hover:hover){
+  .pin__hit:hover{
+    background:rgba(201,162,39,.10);
+    box-shadow:0 0 0 1px rgba(201,162,39,.55) inset;
+  }
+}
+
+.pin__hit:focus-visible{
+  outline:2px solid var(--cover-line);
+}
+
+/* A touch device gets no hover, so nothing would ever say the code is
+   tappable. Three slow rings when the section first arrives, then it
+   stops and leaves the artwork alone. */
+@media (prefers-reduced-motion: no-preference){
+  .content.is-in .pin__hit::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    box-shadow:0 0 0 0 rgba(201,162,39,.55);
+    animation:pin-pulse 2.4s ease-out 3;
+    pointer-events:none;
+  }
+  @keyframes pin-pulse{
+    0%  { box-shadow:0 0 0 0   rgba(201,162,39,.50); }
+    70% { box-shadow:0 0 0 14px rgba(201,162,39,0); }
+    100%{ box-shadow:0 0 0 0   rgba(201,162,39,0); }
+  }
+}
+
+/* ============================================================
+   AMBIENT DRIFT
+
+   Decoration only: never interactive, never above anything a
+   guest needs to read or press. z-index 3 puts it over the
+   designs (2) but under the veil (4) and the curtains (5) —
+   so particles pass behind the silk, which is what sells it as
+   depth rather than as stickers on the glass.
+   ============================================================ */
+
+.ambient{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  /* Nothing renders until the script has measured and seeded it, so an
+     empty canvas never flashes a white rectangle over the paper. */
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+.ambient.is-live{ opacity:1; }
+
+/* No drift at all when motion is unwelcome. The page keeps every one of
+   its own fades, which are short; this one runs forever. */
+@media (prefers-reduced-motion: reduce){
+  .ambient{ display:none; }
+}

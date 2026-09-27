@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wedding Invitation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23727c48'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/simple.css">
+</head>
+<body>
+
+<!-- The curtains are fixed to the viewport, so they genuinely never move.
+     A pair inside each section scrolls with that section, which reads as the
+     whole page sliding rather than just the content. One frame, once. -->
+<div class="curtains" aria-hidden="true">
+  <span class="curtain curtain--l slot slot--optional" data-slot="n-curtain-left.png"><img fetchpriority="high" decoding="async" src="assets/img/n-curtain-left.png" alt=""></span>
+  <span class="curtain curtain--r slot slot--optional" data-slot="n-curtain-right.png"><img fetchpriority="high" decoding="async" src="assets/img/n-curtain-right.png" alt=""></span>
+</div>
+
+<!-- A fixed haze across the top. Content scrolling up meets it and dissolves
+     into the paper before it can reach the screen edge, instead of sliding off
+     as a hard-edged rectangle. Sits under the curtains, so those stay sharp.
+     Mobile only — see the breakpoint in css/simple.css. -->
+<!-- <div class="veil veil--t" aria-hidden="true"></div> -->
+
+<main class="deck">
+
+  <!-- ============ 1 · INVITATION ============ -->
+  <!-- Built from parts, same as section 5. The crest and each block of
+       Khmer text are separate images for now, so any one of them can be
+       re-exported or swapped for live text later without touching the rest.
+       Widths and the space above each block are per-block variables — tune
+       a single line to re-balance the page. -->
+  <section class="page">
+    <div class="content content--built">
+      <div class="n1">
+
+        <div class="n1__logo slot" data-slot="n-1-logo.png">
+          <img fetchpriority="high" decoding="async" src="assets/img/n-1-logo.png" alt="">
+        </div>
+
+        <div class="n1__item n1__item--t1 slot" data-slot="n-1-t1.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-1-t1.png" alt="">
+        </div>¡
+
+        <div class="n1__item n1__item--t2 slot" data-slot="n-1-t2.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-1-t2.png" alt="">
+        </div>
+
+        <div class="n1__item n1__item--t3 slot" data-slot="n-1-t3.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-1-t3.png" alt="">
+        </div>
+
+        <div class="n1__item n1__item--t4 slot" data-slot="n-1-t4.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-1-t4.png" alt="">
+        </div>
+
+        <div class="n1__item n1__item--t5 slot" data-slot="n-1-t5.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-1-t5.png" alt="">
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 · AGENDA ============ -->
+  <section class="page">
+    <div class="content slot" data-slot="n-2.png"><img loading="lazy" decoding="async" src="assets/img/n-2.png" alt=""></div>
+  </section>
+
+  <!-- ============ 3 · ATTIRE ============ -->
+  <section class="page">
+    <div class="content slot" data-slot="n-3.png"><img loading="lazy" decoding="async" src="assets/img/n-3.png" alt=""></div>
+  </section>
+
+  <!-- ============ 4 · LOCATION ============ -->
+  <section class="page">
+    <div class="content slot" data-slot="n-4.png"><img loading="lazy" decoding="async" src="assets/img/n-4.png" alt=""></div>
+  </section>
+
+  <!-- ============ 5 · COUNTDOWN / SAVE THE DATE ============ -->
+  <!-- Built from parts rather than one flat export: the countdown has to
+       tick, so the photos, the numbers and the calendar are real elements.
+       Everything sizes in cqw against .n5, so the whole block scales as one
+       drawing whatever the column width is. -->
+  <section class="page">
+    <div class="content content--built">
+      <div class="n5">
+
+        <div class="n5__photos">
+          <figure class="n5__photo slot" data-slot="n-5-1.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-1.jpg" alt="">
+          </figure>
+          <figure class="n5__photo slot" data-slot="n-5-2.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-2.jpg" alt="">
+          </figure>
+          <figure class="n5__photo slot" data-slot="n-5-3.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-3.jpg" alt="">
+          </figure>
+
+          <!-- Sits over the strip, full width, like the design. The scrim is
+               what keeps white numerals readable over a pale photo. -->
+          <div class="n5__countdown" data-countdown="2026-11-22T00:00:00" role="timer" aria-live="off">
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="days">--</span>
+              <span class="cd__label">DAYS</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="hours">--</span>
+              <span class="cd__label">HOURS</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="minutes">--</span>
+              <span class="cd__label">MINUTES</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="seconds">--</span>
+              <span class="cd__label">SECONDS</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="n5__title">
+          <span class="is-green">LET</span>
+          <span class="is-red">COUNTOWN</span>
+          <span class="is-green">WITH US</span>
+        </h2>
+
+        <div class="n5__mark slot slot--optional" data-slot="n-5-glasses.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-5-glasses.png" alt="">
+        </div>
+
+        <p class="n5__save">SAVE THE DATE</p>
+        <p class="n5__month">November 2026</p>
+
+        <div class="n5__cal cal">
+          <div class="cal__head" aria-hidden="true">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span>
+            <span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal__grid">
+            <span class="cal__day">1</span>
+            <span class="cal__day">2</span>
+            <span class="cal__day">3</span>
+            <span class="cal__day">4</span>
+            <span class="cal__day">5</span>
+            <span class="cal__day">6</span>
+            <span class="cal__day">7</span>
+            <span class="cal__day">8</span>
+            <span class="cal__day">9</span>
+            <span class="cal__day">10</span>
+            <span class="cal__day">11</span>
+            <span class="cal__day">12</span>
+            <span class="cal__day">13</span>
+            <span class="cal__day">14</span>
+            <span class="cal__day">15</span>
+            <span class="cal__day">16</span>
+            <span class="cal__day">17</span>
+            <span class="cal__day">18</span>
+            <span class="cal__day">19</span>
+            <span class="cal__day">20</span>
+            <span class="cal__day">21</span>
+            <span class="cal__day cal__day--mark">
+              <svg class="cal__heart" viewBox="0 0 48 44" aria-hidden="true"><path d="M24 40C12 32 3 25 3 15.5 3 9.7 7.7 5 13.5 5 17.6 5 21.3 7.3 24 11c2.7-3.7 6.4-6 10.5-6C40.3 5 45 9.7 45 15.5 45 25 36 32 24 40Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+              <time datetime="2026-11-22">22</time>
+            </span>
+            <span class="cal__day">23</span>
+            <span class="cal__day">24</span>
+            <span class="cal__day">25</span>
+            <span class="cal__day">26</span>
+            <span class="cal__day">27</span>
+            <span class="cal__day">28</span>
+            <span class="cal__day">29</span>
+            <span class="cal__day">30</span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/simple.js"></script>
+</body>
+</html>

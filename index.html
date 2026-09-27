@@ -4,199 +4,336 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wedding Invitation</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23c9a227'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css">
-<noscript>
-  <!-- Without JS the envelope can never be opened, so skip straight to the card. -->
-  <style>
-    #p05 .sd__cover{ display:none !important; }
-    #p05 .sd__stage,
-    #p05 .sd__line{ opacity:1 !important; transform:none !important; }
-  </style>
-</noscript>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23727c48'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/simple.css">
 </head>
 <body>
 
-<main class="deck">
+<!-- The curtains are fixed to the viewport, so they genuinely never move.
+     A pair inside each section scrolls with that section, which reads as the
+     whole page sliding rather than just the content. One frame, once. -->
+<!-- Ambient drift: gold flecks, bubble lights and petals. One canvas
+     rather than a few dozen animated elements — the same motion costs a
+     single composited layer instead of thirty, which is what keeps it
+     honest on a phone. Sits above the designs but below the curtains, so
+     the drapes stay in front and the whole thing reads as depth. -->
+<canvas class="ambient" id="ambient" aria-hidden="true"></canvas>
 
-  <!-- ============ 0.5 · SAVE THE DATE (envelope + zoom reveal) ============ -->
-  <!-- Opens closed. Tapping the seal opens the flap, the cover fades away and
-       the card zooms down into place, then the lines stagger in. Nothing
-       scrolls. Edit the text below — add or remove a <p class="sd__line">
-       and the cadence re-indexes itself. -->
-  <section class="page sd-ready" id="p05" data-no-reveal>
-    <div class="frame">
-      <div class="slot slot--bg slot--optional" data-slot="p05-bg.jpg"><img fetchpriority="high" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
+<div class="curtains" aria-hidden="true">
+  <span class="curtain curtain--l slot slot--optional" data-slot="n-curtain-left.png"><img fetchpriority="high" decoding="async" src="assets/img/NITA-curtains-left.png" alt=""></span>
+  <span class="curtain curtain--r slot slot--optional" data-slot="n-curtain-right.png"><img fetchpriority="high" decoding="async" src="assets/img/NITA-curtains-right.png" alt=""></span>
+</div>
 
-      <!-- what gets revealed -->
-      <div class="sd__stage">
-        <div class="slot slot--fit slot--optional sd__floral" data-slot="p05-floral.png"><img decoding="async" src="assets/img/p8-floral.png" alt=""></div>
-        <div class="frame__body sd" data-savedate>
-          <p class="sd__line sd__eyebrow">Save <em>the</em> Date</p>
-          <p class="sd__line sd__names">Vanchhay<span class="sd__heart">&#9825;</span>Somanita</p>
-          <p class="sd__line sd__caps">Join us for our special day</p>
-          <p class="sd__line sd__body">Sunday 22<sup>nd</sup> November 2026</p>
-          <p class="sd__line sd__body">Pech Chet Restaurant<br>Dam Dek, Siem Reap</p>
-          <p class="sd__line sd__closing">With love, Will & Losie</p>
-        </div>
-      </div>
-
-      <!-- the cover: sits on top until opened -->
-      <div class="sd__cover">
-        <button class="envelope" type="button" data-envelope aria-label="Open invitation">
-          <span class="envelope__back"></span>
-          <!-- <span class="slot slot--fit envelope__card" data-slot="p0-card-1.png"><img fetchpriority="high" decoding="async" src="assets/img/p0-card-1.png" alt=""></span> -->
-          <span class="envelope__front"></span>
-          <span class="envelope__flap"></span>
-          <span class="envelope__seal">
-            <img fetchpriority="high" decoding="async" src="assets/img/p0-seal.png" alt="">
-            <!-- <span class="slot slot--fit slot--optional envelope__monogram" data-slot="p0-seal.png"><img decoding="async" src="assets/img/p0-seal.png" alt=""></span> -->
-          </span>
-        </button>
-        <span class="intro__hint" aria-hidden="true"></span>
-      </div>
-    </div>
-  </section>
+<!-- A fixed haze across the top. Content scrolling up meets it and dissolves
+     into the paper before it can reach the screen edge, instead of sliding off
+     as a hard-edged rectangle. Sits under the curtains, so those stay sharp.
+     Mobile only — see the breakpoint in css/simple.css. -->
+<!-- <div class="veil veil--t" aria-hidden="true"></div> -->
 
   <!-- ============ 1 · INVITATION ============ -->
-  <section class="page" id="p1">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p1-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p1-bg.jpg" alt=""></div>
-      <div class="frame__body body--center">
-        <div class="slot slot--fit p1__card" data-slot="p1-content.png"><img loading="lazy" decoding="async" src="assets/img/p1-content.png" alt=""></div>
-      </div>
-    </div>
+  <!-- Built from parts, same as section 5. The crest and each block of
+       Khmer text are separate images for now, so any one of them can be
+       re-exported or swapped for live text later without touching the rest.
+       Widths and the space above each block are per-block variables — tune
+       a single line to re-balance the page. -->
+<!-- ============ 0 · COVER ============ -->
+<!-- A fixed overlay, deliberately NOT a .page in the deck. Section 1 is
+     already sitting behind it at scroll 0, so when the silk erases the
+     invitation is simply there — nothing scrolls, nothing jumps.
+
+     Built rather than flattened: on a landscape window a 0.45-ratio image
+     is centre-cropped to its middle third, which would take the frame's
+     top and bottom rules, "YOU'RE INVITED" and the crest's lower half off
+     the screen. So the silk is the only thing that comes from a file. -->
+<div class="cover" id="cover">
+
+  <div class="cover__silk" aria-hidden="true"></div>
+
+  <!-- Four separate rules rather than a border, so each can retract into
+       its own corner when the cover comes apart. -->
+  <div class="cover__frame" aria-hidden="true">
+    <i class="cover__rule cover__rule--t"></i>
+    <i class="cover__rule cover__rule--r"></i>
+    <i class="cover__rule cover__rule--b"></i>
+    <i class="cover__rule cover__rule--l"></i>
+  </div>
+
+  <div class="cover__col">
+    <p class="cover__line cover__line--1">REQUEST THE PLEASURE OF</p>
+    <h1 class="cover__guest" data-guest>Honored Guest</h1>
+    <p class="cover__line cover__line--2">TO CELEBRATE OUR WEDDING</p>
+
+    <!-- The crest is the button. A real <button> so it is reachable by
+         keyboard and announced by a screen reader; the artwork is the
+         only thing that shows. -->
+    <button class="cover__crest" type="button" data-open aria-label="Open the invitation">
+      <img fetchpriority="high" decoding="async" src="assets/img/cover-crest.png" alt="">
+    </button>
+
+    <p class="cover__line cover__line--3">YOU'RE INVITED</p>
+  </div>
+
+</div>
+
+<!-- With JS off the cover could never be opened, so it is never shown. -->
+<noscript><style>.cover{display:none !important}</style></noscript>
+
+<main class="deck">
+
+  <!-- ============ 1 · INVITATION ============ -->
+  <section class="page">
+    <div class="content content--wide content--wide-sm slot" data-slot="n-1.png"><img fetchpriority="high" decoding="async" src="assets/img/long-page-1-1.png" alt=""></div>
   </section>
 
   <!-- ============ 2 · AGENDA ============ -->
-  <section class="page" id="p2">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p2-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p2-bg.jpg" alt=""></div>
-      <div class="frame__body body--center">
-        <div class="slot slot--fit p2__card" data-slot="p2-content.png"><img loading="lazy" decoding="async" src="assets/img/p2-content.png" alt=""></div>
-      </div>
-    </div>
+  <section class="page">
+    <div class="content content--wide content--wide-sm slot" data-slot="n-2.png"><img loading="lazy" decoding="async" src="assets/img/long-agenda-3.png" alt=""></div>
   </section>
 
-
-  <!-- ============ 3 · Location ============ -->
-  <section class="page" id="p3">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p3-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p2-bg.jpg" alt=""></div>
-      <div class="frame__body body--center">
-        <a class="p3__tap" href="#" data-map-link>
-          <div class="slot slot--fit p3__card" data-slot="p3-content.png"><img loading="lazy" decoding="async" src="assets/img/p3-content.png" alt=""></div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 3 · LOCATION ============ -->
-  <!-- <section class="page" id="p3">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p3-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p3-bg.png" alt=""></div>
-      <div class="frame__body p3__stack">
-        <div class="slot slot--fit p3__heading" data-slot="p3-heading.png"><img loading="lazy" decoding="async" src="assets/img/p3-heading.png" alt=""></div>
-        <div class="slot slot--fit p3__map" data-slot="p3-map.png"><img loading="lazy" decoding="async" src="assets/img/p3-map.png" alt=""></div>
-        <a class="p3__link" href="#" data-map-link>
-          <div class="slot slot--fit p3__cta" data-slot="p3-cta.png"><img loading="lazy" decoding="async" src="assets/img/p3-cta.png" alt=""></div>
-        </a>
-        <div class="slot slot--fit p3__qr" data-slot="p3-qr.png"><img loading="lazy" decoding="async" src="assets/img/p3-qr.png" alt=""></div>
-      </div>
-    </div>
+  <!-- ============ 3 · ATTIRE ============ -->
+  <!-- <section class="page">
+    <div class="content content--wide-sm slot" data-slot="n-3.png"><img loading="lazy" decoding="async" src="assets/img/long-attire-1.png" alt=""></div>
   </section> -->
 
-  <!-- ============ 4 · COUNTDOWN ============ -->
-  <section class="page" id="p4">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p4-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
-      <div class="frame__body p4__stack">
+  <!-- ============ 4 · LOCATION ============ -->
+  <section class="page">
+    <div class="content content--wide slot" data-slot="n-4.png">
+      <!-- The QR is useless to anyone already holding the phone that is
+           showing it, so the same destination is a tap target. The hotspot
+           is placed as a percentage of the artwork, measured off the file,
+           so it tracks the image at every size. Covers the "Click/Scan To
+           Open Location" line as well as the code itself. -->
+      <span class="pin">
+        <img loading="lazy" decoding="async" src="assets/img/long-location-1.png" alt="">
+        <a class="pin__hit"
+           href="https://maps.app.goo.gl/6KhHP8NDedUsZorCA?g_st=ic"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Open the venue in Google Maps"></a>
+      </span>
+    </div>
+  </section>
 
-        <div class="p4__strip">
-          <div class="slot p4__photo" data-slot="p4-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-1.jpg" alt=""></div>
-          <div class="slot p4__photo" data-slot="p4-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-2.jpg" alt=""></div>
-          <div class="slot p4__photo" data-slot="p4-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-photo-3.jpg" alt=""></div>
+  <!-- ============ 5 · COUNTDOWN / SAVE THE DATE ============ -->
+  <!-- Built from parts rather than one flat export: the countdown has to
+       tick, so the photos, the numbers and the calendar are real elements.
+       Everything sizes in cqw against .n5, so the whole block scales as one
+       drawing whatever the column width is. -->
+  <section class="page">
+    <div class="content content--wide content--built">
+      <div class="n5">
 
-          <div class="countdown" data-countdown>
-            <div class="countdown__unit"><span class="countdown__num" data-cd="days">--</span><span class="countdown__label">DAYS</span></div>
-            <span class="countdown__sep">:</span>
-            <div class="countdown__unit"><span class="countdown__num" data-cd="hours">--</span><span class="countdown__label">HOURS</span></div>
-            <span class="countdown__sep">:</span>
-            <div class="countdown__unit"><span class="countdown__num" data-cd="minutes">--</span><span class="countdown__label">MINUTES</span></div>
-            <span class="countdown__sep">:</span>
-            <div class="countdown__unit"><span class="countdown__num" data-cd="seconds">--</span><span class="countdown__label">SECONDS</span></div>
+        <div class="n5__photos">
+          <figure class="n5__photo slot" data-slot="n-5-1.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-1.jpg" alt="">
+          </figure>
+          <figure class="n5__photo slot" data-slot="n-5-2.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-2.jpg" alt="">
+          </figure>
+          <figure class="n5__photo slot" data-slot="n-5-3.jpg">
+            <img loading="lazy" decoding="async" src="assets/img/n-5-3.jpg" alt="">
+          </figure>
+
+          <!-- Sits over the strip, full width, like the design. The scrim is
+               what keeps white numerals readable over a pale photo. -->
+          <div class="n5__countdown" data-countdown="2026-11-22T00:00:00" role="timer" aria-live="off">
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="days">--</span>
+              <span class="cd__label">DAYS</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="hours">--</span>
+              <span class="cd__label">HOURS</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="minutes">--</span>
+              <span class="cd__label">MINUTES</span>
+            </div>
+            <span class="cd__sep" aria-hidden="true">:</span>
+            <div class="cd__unit">
+              <span class="cd__num" data-cd="seconds">--</span>
+              <span class="cd__label">SECONDS</span>
+            </div>
           </div>
         </div>
 
-        <div class="slot slot--fit p4__tagline" data-slot="p4-tagline.png"><img loading="lazy" decoding="async" src="assets/img/p4-tagline.png" alt=""></div>
-        <div class="slot slot--fit p4__card" data-slot="p4-content.png"><img loading="lazy" decoding="async" src="assets/img/p4-content.png" alt=""></div>
+        <h2 class="n5__title">
+          <span class="is-green">LET</span>
+          <span class="is-red">COUNTOWN</span>
+          <span class="is-green">WITH US</span>
+        </h2>
+
+        <!-- <div class="n5__mark slot slot--optional" data-slot="n-5-glasses.png">
+          <img loading="lazy" decoding="async" src="assets/img/n-5-glasses.png" alt="">
+        </div> -->
+
+        <p class="n5__save">SAVE THE DATE</p>
+        <p class="n5__month">November 2026</p>
+
+        <div class="n5__cal cal">
+          <div class="cal__head" aria-hidden="true">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span>
+            <span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+          <div class="cal__grid">
+            <span class="cal__day">1</span>
+            <span class="cal__day">2</span>
+            <span class="cal__day">3</span>
+            <span class="cal__day">4</span>
+            <span class="cal__day">5</span>
+            <span class="cal__day">6</span>
+            <span class="cal__day">7</span>
+            <span class="cal__day">8</span>
+            <span class="cal__day">9</span>
+            <span class="cal__day">10</span>
+            <span class="cal__day">11</span>
+            <span class="cal__day">12</span>
+            <span class="cal__day">13</span>
+            <span class="cal__day">14</span>
+            <span class="cal__day">15</span>
+            <span class="cal__day">16</span>
+            <span class="cal__day">17</span>
+            <span class="cal__day">18</span>
+            <span class="cal__day">19</span>
+            <span class="cal__day">20</span>
+            <span class="cal__day">21</span>
+            <span class="cal__day cal__day--mark">
+              <svg class="cal__heart" viewBox="0 0 48 44" aria-hidden="true"><path d="M24 40C12 32 3 25 3 15.5 3 9.7 7.7 5 13.5 5 17.6 5 21.3 7.3 24 11c2.7-3.7 6.4-6 10.5-6C40.3 5 45 9.7 45 15.5 45 25 36 32 24 40Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+              <time datetime="2026-11-22">22</time>
+            </span>
+            <span class="cal__day">23</span>
+            <span class="cal__day">24</span>
+            <span class="cal__day">25</span>
+            <span class="cal__day">26</span>
+            <span class="cal__day">27</span>
+            <span class="cal__day">28</span>
+            <span class="cal__day">29</span>
+            <span class="cal__day">30</span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+            <span class="cal__day cal__day--blank" aria-hidden="true"></span>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- ============ 5 · GALLERY A ============ -->
-  <section class="page" id="p5">
-    <div class="frame frame--plain">
-      <div class="slot slot--bg" data-slot="p5-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
-      <div class="frame__body p5__stack">
-        <div class="slot slot--fit p5__heading" data-slot="p5-heading.png"><img loading="lazy" decoding="async" src="assets/img/p5-heading.png" alt=""></div>
-        <div class="slot p5__photo" data-slot="p5-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p5-photo-1-1.jpg" alt=""></div>
-        <div class="slot p5__photo" data-slot="p5-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p5-photo-2.jpg" alt=""></div>
+
+  <!-- ============ 6 · GALLERY ============ -->
+  <!-- A mosaic, not a uniform grid: the three shoots each get a different
+       rhythm, so the eye keeps moving instead of scanning rows. Every tile
+       is one of four shapes — hero, wide, feature, tall — and the
+       shape carries both its span and its crop, so re-ordering the photos
+       is a matter of swapping a class, never touching the layout. -->
+  <section class="page page--gallery">
+    <div class="content content--gallery">
+      <div class="gal">
+
+        <header class="gal__head">
+          <p class="gal__kicker">OUR STORY</p>
+          <h2 class="gal__title">Gallery</h2>
+        </header>
+
+        <div class="gal__grid">
+          <figure class="gal__item gal__item--hero slot" data-slot="g-01.jpg" style="--i:0">
+            <img loading="lazy" decoding="async" src="assets/img/g-01.jpg" alt="The couple on the tea-house bench">
+          </figure>
+
+          <figure class="gal__item gal__item--tall slot" data-slot="g-02.jpg" style="--i:1">
+            <img loading="lazy" decoding="async" src="assets/img/g-02.jpg" alt="A kiss on the hand, traditional blue silk">
+          </figure>
+
+          <figure class="gal__item gal__item--tall slot" data-slot="g-03.jpg" style="--i:2">
+            <img loading="lazy" decoding="async" src="assets/img/g-03.jpg" alt="An embrace, traditional blue silk">
+          </figure>
+
+          <figure class="gal__item gal__item--tall slot" data-slot="g-04.jpg" style="--i:3">
+            <img loading="lazy" decoding="async" src="assets/img/g-04.jpg" alt="Forehead to forehead against the sun">
+          </figure>
+
+          <figure class="gal__item gal__item--feature slot" data-slot="g-05.jpg" style="--i:4">
+            <img loading="lazy" decoding="async" src="assets/img/g-05.jpg" alt="The bride, lit by a single circle">
+          </figure>
+
+          <figure class="gal__item gal__item--feature gal__item--wide-sm slot" data-slot="g-06.jpg" style="--i:5">
+            <img loading="lazy" decoding="async" src="assets/img/g-06.jpg" alt="The couple among the forest ferns">
+          </figure>
+
+          <figure class="gal__item gal__item--wide slot" data-slot="g-07.jpg" style="--i:6">
+            <img loading="lazy" decoding="async" src="assets/img/g-07.jpg" alt="The groom, lit by a single circle">
+          </figure>
+
+          <figure class="gal__item gal__item--wide slot" data-slot="g-08.jpg" style="--i:7">
+            <img loading="lazy" decoding="async" src="assets/img/g-08.jpg" alt="By the lion statue at the temple moat">
+          </figure>
+
+          <figure class="gal__item gal__item--feature slot" data-slot="g-09.jpg" style="--i:8">
+            <img loading="lazy" decoding="async" src="assets/img/g-09.jpg" alt="Walking the temple causeway">
+          </figure>
+
+          <figure class="gal__item gal__item--feature slot" data-slot="g-10.jpg" style="--i:9">
+            <img loading="lazy" decoding="async" src="assets/img/g-10.jpg" alt="Resting against the temple wall">
+          </figure>
+
+          <figure class="gal__item gal__item--feature slot" data-slot="g-11.jpg" style="--i:10">
+            <img loading="lazy" decoding="async" src="assets/img/g-11.jpg" alt="Under the parasol on the temple lawn">
+          </figure>
+
+          <figure class="gal__item gal__item--feature slot" data-slot="g-12.jpg" style="--i:11">
+            <img loading="lazy" decoding="async" src="assets/img/g-12.jpg" alt="A quiet moment by the water">
+          </figure>
+
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- ============ 6 · GALLERY B ============ -->
-  <section class="page" id="p6">
-    <div class="frame frame--plain">
-      <div class="slot slot--bg" data-slot="p6-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
-      <div class="frame__body p6__grid">
-        <div class="slot g6-a" data-slot="p6-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-1.jpg" alt=""></div>
-        <div class="slot g6-b" data-slot="p6-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-2.jpg" alt=""></div>
-        <div class="slot g6-c" data-slot="p6-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-3.jpg" alt=""></div>
-        <div class="slot g6-d" data-slot="p6-photo-4.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-4.jpg" alt=""></div>
-        <div class="slot g6-e" data-slot="p6-photo-5.jpg"><img loading="lazy" decoding="async" src="assets/img/p6-photo-5.jpg" alt=""></div>
-      </div>
+  <!-- ============ 7 · Gratitude ============ -->
+  <section class="page">
+    <div class="content content--wide content--wide-sm slot" data-slot="n-7.png"><img loading="lazy" decoding="async" src="assets/img/long-gratitude-attire-1.png" alt=""></div>
+  </section>
+
+  <!-- ============ 8 · BLESSING ============ -->
+  <!-- Same shape as the other flat designs: one export, widened on both
+       desktop and phone. Until the file lands the slot shows its own name
+       as a dashed placeholder, so the page stays readable while you work. -->
+  <section class="page">
+    <div class="content content--wide content--wide-sm slot" data-slot="long-blessing.png">
+      <img loading="lazy" decoding="async" src="assets/img/long-blessing.png" alt="">
     </div>
   </section>
 
-  <!-- ============ 7 · GALLERY C ============ -->
-  <section class="page" id="p7">
-    <div class="frame frame--plain">
-      <div class="frame__body p7__grid">
-        <div class="slot g7-a" data-slot="p7-photo-1.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-1.jpg" alt=""></div>
-        <div class="slot g7-b" data-slot="p7-photo-2.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-2.jpg" alt=""></div>
-        <div class="slot g7-c" data-slot="p7-photo-3.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-3-1.jpg" alt=""></div>
-        <div class="slot g7-d" data-slot="p7-photo-4.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-4.jpg" alt=""></div>
-        <div class="slot g7-e" data-slot="p7-photo-5.jpg"><img loading="lazy" decoding="async" src="assets/img/p7-photo-5.jpg" alt=""></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 8 · THANK YOU ============ -->
-  <section class="page" id="p8">
-    <div class="frame">
-      <div class="slot slot--bg" data-slot="p8-bg.jpg"><img loading="lazy" decoding="async" src="assets/img/p4-bg.jpg" alt=""></div>
-      <div class="slot slot--fit p8__floral" data-slot="p8-floral.png"><img loading="lazy" decoding="async" src="assets/img/p8-floral.png" alt=""></div>
-      <div class="frame__body body--center">
-        <div class="slot slot--fit p8__card" data-slot="p8-content.png"><img loading="lazy" decoding="async" src="assets/img/p8-content-1.png" alt=""></div>
-      </div>
-    </div>
-  </section>
-
+<!-- Closing the main content area -->
 </main>
 
-<!-- Ambient petals and shimmer. One canvas for the whole site rather than
-     dozens of animated DOM nodes — 30-odd particles on a single compositor
-     layer instead of 30 layers. Purely decorative, never takes a click. -->
-<canvas class="ambient" data-ambient aria-hidden="true"></canvas>
 
-<!-- Music toggle. Stays hidden unless a track in TRACKS (js/app.js) actually
-     loads, so the site is unchanged if you never add audio. -->
-<button class="music" type="button" data-music aria-label="Toggle music" hidden>
+<!-- Appears only once the music is actually going — before that there is
+     nothing to toggle, and a dead control on the cover would be noise.
+     The bars are the state: dancing means playing, flat means paused. -->
+<button class="music" id="music" type="button" aria-label="Pause music" hidden>
   <span class="music__bars" aria-hidden="true"><i></i><i></i><i></i></span>
 </button>
 
-<script src="js/app.js"></script>
+<!-- Opened by any gallery tile. One dialog reused for all twelve photos —
+     the image src is swapped rather than twelve overlays being built. -->
+<div class="lb" id="lightbox" hidden>
+  <button class="lb__close" type="button" aria-label="Close">&times;</button>
+  <button class="lb__nav lb__nav--prev" type="button" aria-label="Previous">&#8249;</button>
+  <figure class="lb__stage">
+    <img class="lb__img" src="" alt="">
+    <figcaption class="lb__caption"></figcaption>
+  </figure>
+  <button class="lb__nav lb__nav--next" type="button" aria-label="Next">&#8250;</button>
+</div>
+
+<script src="js/simple.js"></script>
 </body>
 </html>
