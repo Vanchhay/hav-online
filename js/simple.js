@@ -171,10 +171,15 @@
     var last = 0;
 
     function frame(now) {
+      rafId = 0;
       if (!running) { return; }
       /* Clamp the step. A tab that was backgrounded hands back a gap of
          several seconds, and without this every particle teleports. */
-      var dt = Math.min(now - last || 16, 48);
+      /* `now - last || 16` was a trap: a delta of exactly 0 is falsy, so two
+         callbacks landing on the same rAF timestamp each took a FULL 16ms
+         step instead of none. That is what turned duplicate loops into
+         visible speed rather than merely wasted work. */
+      var dt = last ? Math.min(now - last, 48) : 16;
       last = now;
 
       ctx.clearRect(0, 0, w, h);
@@ -210,6 +215,10 @@
         ctx.globalAlpha = 1;
         drawPetal({ x: p.x + Math.sin(p.phase) * p.sway, y: p.y, s: p.s,
                     rot: p.rot, flip: p.flip, tint: p.tint, alpha: p.alpha });
+        /* x drifts every frame but only y was ever checked, so over a long
+           session petals wandered off the sides for good and the effect
+           slowly thinned out. Wrap them instead. */
+        if (p.x < -80) { p.x = w + 60; } else if (p.x > w + 80) { p.x = -60; }
         if (p.y > h + p.s * 3) { petals[i] = newPetal(false); }
       });
 
@@ -224,21 +233,32 @@
       });
 
       ctx.globalAlpha = 1;
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
     }
 
     /* -- run only when it can be seen -- */
 
     var running = false;
+    var rafId = 0;
 
     function start() {
       if (running) { return; }
       running = true;
       last = 0;
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
     }
 
-    function stop() { running = false; }
+    /* Clearing the flag is not enough on its own. A callback scheduled
+       before the tab was hidden is still queued; if the tab comes back
+       before it fires, start() sees running === false, begins a second
+       loop, and then the old callback fires, sees running === true and
+       keeps itself alive too. Every hide/show cycle added another loop —
+       measured: six loops after five cycles, so everything moved six times
+       too fast. Cancelling the pending frame is what actually stops it. */
+    function stop() {
+      running = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    }
 
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { stop(); } else { start(); }
