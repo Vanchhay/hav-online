@@ -294,7 +294,15 @@
     try {
       var asked = new URLSearchParams(window.location.search).get('to');
       if (asked) {
-        asked = asked.replace(/\+/g, ' ').trim();
+        /* Underscores stand in for spaces. A Khmer name percent-encodes to
+           a long run of %E1%9E.. and a literal space would add %20 between
+           every word on top of that; an underscore survives being pasted
+           into a chat app untouched, so ?to=លោក_ប៉ាវ_វ៉ាន់ឆ្នី stays
+           readable as a link and still arrives as three words.
+
+           URLSearchParams already turns + into a space by itself, so the
+           old replace(/\+/g) here only ever corrupted an escaped %2B. */
+        asked = asked.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
         if (asked) { guestSlot.textContent = asked; }
       }
     } catch (e) { /* no URLSearchParams, or a malformed query — keep the default */ }
